@@ -2,6 +2,7 @@ import {convertStateToFen, copyState, findKnightPos, generateHeatMap} from './Kn
 import { Chessboard } from 'react-chessboard';
 import { useState } from 'react';
 import $ from 'jquery';
+import './KnightMoveProblem.css';
 
 const cols = 'abcdefgh';
 

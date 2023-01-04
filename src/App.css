@@ -1,9 +1,7 @@
 .App {
   text-align: center;
-  width:50px; /* or whatever width you want. */
-  max-width:50px; /* or whatever width you want. */
 }
-
+/* 
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -38,4 +36,4 @@
   to {
     transform: rotate(360deg);
   }
-}
+} */
