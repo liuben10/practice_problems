@@ -2,6 +2,7 @@ import { KnightMoveProblem } from './KnightMoveProblem.js'
 import './App.css';
 import {ProblemDemo} from './ProblemDemo.js';
 import { ContentBox } from './ContentBox.js';
+import CodeWindow from 'react-code-window';
 
 function heatMap() {
   return <ContentBox content={<KnightMoveProblem />} />
@@ -33,14 +34,49 @@ function explanationP1() {
   } />
 };
 
+function codeWindow() {
+  let code = `
+let heatMap = [];
+for(let i = 0; i < 8; i++) {
+      let copyOfRow = [...knightGameState.boardState[i]]
+      for (let j = 0; j < 8; j++) {
+          if (copyOfRow[j] === 0) {
+              copyOfRow[j] = Infinity;
+          }
+      }
+      heatMap.push(copyOfRow);
+  }
+  let [kI, kJ] = knightGameState.knightPos;
+  let fringe = []
+  let knightMoves = nextKnightMoves(kI,kJ);
+  knightMoves.forEach((moveTuple) => fringe.push([moveTuple, 1]));
+  while (fringe.length) {
+      let [nextMov, steps] = fringe.shift();
+      let [nextI, nextJ] = nextMov;
+      heatMap[8-nextI-1][nextJ] = Math.min(heatMap[8-nextI-1][nextJ], steps);
+      let nextMoves = nextKnightMoves(nextI, nextJ);
+      nextMoves.forEach((moveTuple) => {
+          let [nI, nJ] = moveTuple;
+          if (heatMap[8-nI-1][nJ] > steps + 1) {
+              fringe.push([[nI, nJ], steps + 1]);
+          }
+      })
+  }
+  return heatMap;
+  `;
+  return <ContentBox content={<CodeWindow width="100%">{code}</CodeWindow>} />;
+}
+
 function getChessProblemArticle() {
   return [
     title(),
     problemDescription(),
     explanationP1(),
+    codeWindow(),
     heatMap(),
   ]
 }
+
 function App() {
   return (
     <div className="App">
