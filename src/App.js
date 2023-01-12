@@ -35,40 +35,7 @@ function explanationP1() {
 };
 
 function codeWindow() {
-  return <InteractiveCodeWindow />;
-//   let code = `
-// let heatMap = [];
-// for(let i = 0; i < 8; i++) {
-//       let copyOfRow = [...knightGameState.boardState[i]]
-//       for (let j = 0; j < 8; j++) {
-//           if (copyOfRow[j] === 0) {
-//               copyOfRow[j] = Infinity;
-//           }
-//       }
-//       heatMap.push(copyOfRow);
-//   }
-//   let [kI, kJ] = knightGameState.knightPos;
-//   let fringe = []
-//   let knightMoves = nextKnightMoves(kI,kJ);
-//   knightMoves.forEach((moveTuple) => fringe.push([moveTuple, 1]));
-//   while (fringe.length) {
-//       let [nextMov, steps] = fringe.shift();
-//       let [nextI, nextJ] = nextMov;
-//       heatMap[8-nextI-1][nextJ] = Math.min(heatMap[8-nextI-1][nextJ], steps);
-//       let nextMoves = nextKnightMoves(nextI, nextJ);
-//       nextMoves.forEach((moveTuple) => {
-//           let [nI, nJ] = moveTuple;
-//           if (heatMap[8-nI-1][nJ] > steps + 1) {
-//               fringe.push([[nI, nJ], steps + 1]);
-//           }
-//       })
-//   }
-//   return heatMap;
-//   `;
-//   let ast = parse(code, {ecmaVersion: 2020});
-//   full(ast, (node) => {console.log(`Type: ${node.type}. START AND END. ${node.start}. ${node.end}`)});
-//   console.log(ast);
-//   return <ContentBox content={<CodeWindow width="70%">{code}</CodeWindow>} />;
+  return <ContentBox content={<InteractiveCodeWindow />} />;
 }
 
 function getChessProblemArticle() {

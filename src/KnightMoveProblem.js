@@ -36,7 +36,7 @@ function renderHeatMap(heatmap) {
     }
 }
 
-function KnightMoveProblem() {
+function initState() {
     let initialBoardState = [
         [-1, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
@@ -47,10 +47,14 @@ function KnightMoveProblem() {
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
     ];
-    let initialState = {
+    return {
         'boardState': initialBoardState,
         'knightPos': findKnightPos(initialBoardState),
     }
+}
+
+function KnightMoveProblem() {
+    let initialState = initState()
     const [knightGameState, setBoardState] = useState(initialState);
     let convertedFen = convertStateToFen(knightGameState.boardState);
     let heatMap = generateHeatMap(knightGameState);
@@ -75,4 +79,4 @@ function KnightMoveProblem() {
 }
 
 
-export { KnightMoveProblem }
+export { KnightMoveProblem, initState}

@@ -1,4 +1,5 @@
 .InteractiveCodeWindow {
+    display: flex;
 }
 
 .InteractiveCodeWindow div{
