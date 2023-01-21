@@ -7,6 +7,7 @@ import { StateRenderer } from './StateRenderer.js';
 import { initState } from './KnightMoveProblem.js';
 import { useState } from 'react';
 import { traverse, Visitor } from './Visitor.js';
+import reactStringReplace from 'react-string-replace';
 
 function parseCodeIntoAst(code) {
     return parse(code, {ecmaVersion: 2020});
@@ -64,13 +65,32 @@ for(let i = 0; i < 8; i++) {
   return heatMap;
 `
 
+function splits(code, start, end) {
+    let codeSplit = [code.substring(0, start+1), code.substring(start, end), code.substring(end)];
+    let replaceWithJsx = codeSplit[1];
+    return reactStringReplace(code, replaceWithJsx, (match, _i) => {
+        return <mark>{match}</mark>
+    });
+}
+
+function HighlightableCodeBloc(props) {
+    let [highlightState, setHighlightState] = useState(props.state ?? {});
+    let startLine = props.startLine;
+    let endLine = props.endLine;
+    
+    let codeSplit = splits(props.code, startLine, endLine);
+    console.log(codeSplit);
+    return <div>{codeSplit.map((d, _idx) => d)}</div>;
+}
+
 function CodeEditor(props) {
-    let [programState, setTraversalState] = useState(props.state ?? {})
+    let [programState, setTraversalState] = useState(props.state ?? {});
     let code = forLoopExample;
     let ast = parseCodeIntoAst(code);
     console.log(ast);
-    traverse(ast, {pc: 0, loops: []}, {});
-    return <div><CodeWindow >{code}</CodeWindow></div>;
+    traverse(ast, {pc_start: 0, pc_end: 0, loops: []}, {});
+    let codeWindow = <div ><HighlightableCodeBloc code={code} startLine={0} endLine={4} /></div>
+    return <div>{codeWindow}</div>;
   }
 
   function InteractiveCodeWindow() {
