@@ -77,34 +77,35 @@ function splits(code, start, end) {
 function HighlightableCodeBloc(props) {
     let startLine = props.startLine;
     let endLine = props.endLine;
+
     
     let codeSplit = splits(props.code, startLine, endLine);
     return <code className="HighlightableCodeBlock">{codeSplit.map((d, _idx) => d)}</code>;
 }
 
 function CodeEditor(props) {
-    let code = forLoopExample;
-    let ast = parseCodeIntoAst(code);
-    console.log(ast);
-    traverse(ast, {pc_start: 0, pc_end: 0, loops: []}, {});
-    let codeWindow = <div ><HighlightableCodeBloc code={code} startLine={0} endLine={4} /></div>
+    let codeWindow = <div ><HighlightableCodeBloc code={props.code} startLine={props.programState.currentStartLine} endLine={props.programState.currentEndLine} /></div>
     return <div>{codeWindow}</div>;
   }
 
-  function InteractiveCodeWindow() {
-    return <div className="InteractiveCodeWindow"><CodeEditor /><StateRenderer state={initState()} /></div>;
+  function InteractiveCodeWindow(props) {
+    return <div className="InteractiveCodeWindow"><CodeEditor code={props.code} programState={props.programState} /><StateRenderer state={initState()} /></div>;
   }
 
   function CodeDebugger() {
+    let code = forLoopExample;
+    let ast = parseCodeIntoAst(code);
     let initState = {
-        currentStartLine: 0,
-        currentEndLine: 0,
+        currentStartLine: ast.body[0].start,
+        currentEndLine: ast.body[0].end,
     }
     let [programState, setProgramState] = useState(initState);
-    let reset = () => setProgramState({currentStartLine: 0, currentEndLine: 0});
+    console.log(ast);
+    traverse(ast, {pc_start: 0, pc_end: 0, loops: []}, {});
+    let reset = () => setProgramState(initState);
     let play = () => console.log("Play was pressed!");
     let next = () => console.log("Next was pressed!");
-    return <div><InteractiveCodeWindow /><button onClick={reset}>reset</button><button onClick={play}>play</button><button onClick={next}>next</button></div>
+    return <div><InteractiveCodeWindow code={code} programState={programState} /><button onClick={reset}>reset</button><button onClick={play}>play</button><button onClick={next}>next</button></div>
   }
 
   export {InteractiveCodeWindow, CodeDebugger};
