@@ -8,6 +8,7 @@ import { initState } from './KnightMoveProblem.js';
 import { useState } from 'react';
 import { traverse, Visitor } from './Visitor.js';
 import reactStringReplace from 'react-string-replace';
+import './HighlightableCodeBlock.css';
 
 function parseCodeIntoAst(code) {
     return parse(code, {ecmaVersion: 2020});
@@ -74,17 +75,14 @@ function splits(code, start, end) {
 }
 
 function HighlightableCodeBloc(props) {
-    let [highlightState, setHighlightState] = useState(props.state ?? {});
     let startLine = props.startLine;
     let endLine = props.endLine;
     
     let codeSplit = splits(props.code, startLine, endLine);
-    console.log(codeSplit);
-    return <div>{codeSplit.map((d, _idx) => d)}</div>;
+    return <code className="HighlightableCodeBlock">{codeSplit.map((d, _idx) => d)}</code>;
 }
 
 function CodeEditor(props) {
-    let [programState, setTraversalState] = useState(props.state ?? {});
     let code = forLoopExample;
     let ast = parseCodeIntoAst(code);
     console.log(ast);
@@ -94,9 +92,19 @@ function CodeEditor(props) {
   }
 
   function InteractiveCodeWindow() {
-    return <div className="InteractiveCodeWindow"><div>{CodeEditor({})}</div><StateRenderer state={initState()} /></div>;
+    return <div className="InteractiveCodeWindow"><CodeEditor /><StateRenderer state={initState()} /></div>;
   }
 
-  
+  function CodeDebugger() {
+    let initState = {
+        currentStartLine: 0,
+        currentEndLine: 0,
+    }
+    let [programState, setProgramState] = useState(initState);
+    let reset = () => setProgramState({currentStartLine: 0, currentEndLine: 0});
+    let play = () => console.log("Play was pressed!");
+    let next = () => console.log("Next was pressed!");
+    return <div><InteractiveCodeWindow /><button onClick={reset}>reset</button><button onClick={play}>play</button><button onClick={next}>next</button></div>
+  }
 
-  export {InteractiveCodeWindow};
+  export {InteractiveCodeWindow, CodeDebugger};
