@@ -9,6 +9,8 @@ import { useState } from 'react';
 import { traverse, Visitor } from './Visitor.js';
 import reactStringReplace from 'react-string-replace';
 import './HighlightableCodeBlock.css';
+import { useSelector, useDispatch } from 'react-redux';
+import  {next, play, reset, parseAst} from './knightStoreSlice.js';
 
 function parseCodeIntoAst(code) {
     return parse(code, {ecmaVersion: 2020});
@@ -34,7 +36,6 @@ for(let i = 0; i < 8; i++) {
       heatMap.push(copyOfRow);
   }
 `
-
 
 const knightHeatMapCode = `
 let heatMap = [];
@@ -77,35 +78,55 @@ function splits(code, start, end) {
 function HighlightableCodeBloc(props) {
     let startLine = props.startLine;
     let endLine = props.endLine;
-
-    
     let codeSplit = splits(props.code, startLine, endLine);
     return <code className="HighlightableCodeBlock">{codeSplit.map((d, _idx) => d)}</code>;
 }
 
 function CodeEditor(props) {
-    let codeWindow = <div ><HighlightableCodeBloc code={props.code} startLine={props.programState.currentStartLine} endLine={props.programState.currentEndLine} /></div>
+    let programCounter = useSelector((state) => {
+        return state.knightStore.programCounter;
+    });
+    console.log("CODE EDITOR: " + JSON.stringify(props.exec, null, 1));
+    let codeWindow = <div ><HighlightableCodeBloc code={props.code} startLine={
+        programCounter < props.exec.length ? props.exec[programCounter].start : props.exec[props.exec.length-1].start
+    } endLine={
+        programCounter < props.exec.length ? props.exec[programCounter].end : props.exec[props.exec.length-1].end
+    } /></div>
     return <div>{codeWindow}</div>;
-  }
+}
 
   function InteractiveCodeWindow(props) {
-    return <div className="InteractiveCodeWindow"><CodeEditor code={props.code} programState={props.programState} /><StateRenderer state={initState()} /></div>;
+    return <div className="InteractiveCodeWindow"><CodeEditor code={props.code} exec={props.exec} programState={props.programState} /><StateRenderer state={initState()} /></div>;
   }
 
   function CodeDebugger() {
-    let code = forLoopExample;
+    const dispatch = useDispatch();
+    let code = simpleTestCode;
     let ast = parseCodeIntoAst(code);
-    let initState = {
-        currentStartLine: ast.body[0].start,
-        currentEndLine: ast.body[0].end,
-    }
     let [programState, setProgramState] = useState(initState);
+    let programCounter = useSelector((state) => {
+        return state.knightStore.programCounter;
+    });
     console.log(ast);
-    traverse(ast, {pc_start: 0, pc_end: 0, loops: []}, {});
-    let reset = () => setProgramState(initState);
-    let play = () => console.log("Play was pressed!");
-    let next = () => console.log("Next was pressed!");
-    return <div><InteractiveCodeWindow code={code} programState={programState} /><button onClick={reset}>reset</button><button onClick={play}>play</button><button onClick={next}>next</button></div>
+    let v = new Visitor(programState, {});
+    traverse(ast, v);
+    let resetButton = () => {
+        dispatch(reset());
+    };
+    let playButton = () => {
+        console.log(programState);
+    };
+    let nextButton = () => {
+        if (programCounter < v.traversal.length) {
+            dispatch(next())
+        }
+    };
+    return (<div><InteractiveCodeWindow code={code} exec={v.traversal} programState={programState} />
+            <button onClick={resetButton}>reset</button>
+            <button onClick={playButton}>play</button>
+            <button onClick={nextButton}>next</button>
+        </div>);
+
   }
 
   export {InteractiveCodeWindow, CodeDebugger};

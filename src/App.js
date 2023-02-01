@@ -3,6 +3,8 @@ import './App.css';
 import {ProblemDemo} from './ProblemDemo.js';
 import {ContentBox} from './ContentBox.js';
 import { InteractiveCodeWindow, CodeDebugger } from './InteractiveCodeWindow.js';
+import { Provider } from 'react-redux';
+import knightStore from './knightStore';
 
 function heatMap() {
   return <ContentBox content={<KnightMoveProblem />} />
@@ -35,7 +37,7 @@ function explanationP1() {
 };
 
 function codeWindow() {
-  return <ContentBox content={<CodeDebugger />} />;
+  return <Provider store={knightStore}><ContentBox content={<CodeDebugger />} /></Provider>;
 }
 
 function getChessProblemArticle() {
