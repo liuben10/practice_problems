@@ -1,15 +1,13 @@
-import { ContentBox } from './ContentBox.js';
-import CodeWindow from 'react-code-window';
 import {parse} from 'acorn-loose';
 import {full} from 'acorn-walk';
 import './InteractiveCodeWindow.css';
 import { StateRenderer } from './StateRenderer.js';
 import { initState } from './KnightMoveProblem.js';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { traverse, Visitor } from './Visitor.js';
 import reactStringReplace from 'react-string-replace';
 import './HighlightableCodeBlock.css';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch} from 'react-redux';
 import  {next, play, reset, parseAst} from './knightStoreSlice.js';
 
 function parseCodeIntoAst(code) {
@@ -83,10 +81,16 @@ function HighlightableCodeBloc(props) {
 }
 
 function CodeEditor(props) {
+    const dispatch = useDispatch();
     let programCounter = useSelector((state) => {
         return state.knightStore.programCounter;
     });
-    console.log("CODE EDITOR: " + JSON.stringify(props.exec, null, 1));
+    useEffect(() => {
+        let execNode = props.exec[programCounter];
+        if (execNode.resetProgramCounter) {
+            dispatch(next(execNode.resetProgramCounter));
+        }
+    });
     let codeWindow = <div ><HighlightableCodeBloc code={props.code} startLine={
         programCounter < props.exec.length ? props.exec[programCounter].start : props.exec[props.exec.length-1].start
     } endLine={
@@ -101,20 +105,18 @@ function CodeEditor(props) {
 
   function CodeDebugger() {
     const dispatch = useDispatch();
-    let code = simpleTestCode;
+    let code = forLoopExample;
     let ast = parseCodeIntoAst(code);
     let [programState, setProgramState] = useState(initState);
     let programCounter = useSelector((state) => {
         return state.knightStore.programCounter;
     });
     console.log(ast);
-    let v = new Visitor(programState, {});
+    let traversal = []
+    let v = new Visitor(traversal);
     traverse(ast, v);
     let resetButton = () => {
         dispatch(reset());
-    };
-    let playButton = () => {
-        console.log(programState);
     };
     let nextButton = () => {
         if (programCounter < v.traversal.length) {
@@ -123,7 +125,6 @@ function CodeEditor(props) {
     };
     return (<div><InteractiveCodeWindow code={code} exec={v.traversal} programState={programState} />
             <button onClick={resetButton}>reset</button>
-            <button onClick={playButton}>play</button>
             <button onClick={nextButton}>next</button>
         </div>);
 

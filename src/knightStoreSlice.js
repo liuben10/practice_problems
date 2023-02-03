@@ -11,7 +11,11 @@ export const knightSlice = createSlice({
     reducers: {
         // TODO https://react-redux.js.org/tutorials/quick-start
         next(state, action) {
-            state.programCounter += 1;
+            if (action.payload) {
+                state.programCounter = action.payload;
+            } else {
+                state.programCounter += 1;
+            }
         },
         play(state, action) {
             console.log("Play was pressed");

@@ -20,9 +20,6 @@ function traverse(ast, v) {
         ReturnStatement: (node, state, c) => {
             v.visitReturnStatement(node);
         },
-        Literal: (node, state, c) => {
-            v.visitLiteral(node);
-        }
 
     });
     console.log("TRAVERSAL ORDER");
@@ -30,23 +27,13 @@ function traverse(ast, v) {
 }
 
 class Visitor {
-    constructor(programState, state) {
-        this.programState = programState;
-        this.state = state;
-        this.traversal = [];
+    constructor(traversal) {
+        this.traversal = traversal;
     }
 
     resetPcToBeginningIfInLoop() {
         if (this.programState.loops) {
         }       
-    }
-    
-    visitLiteral(node) {
-        this.programState.currentStartLine = node.start;
-        this.programState.currentEndLine = node.end;
-        this.traversal.push(node);
-        console.log(` literal VISITING: ${node.type} start: ${node.start} end ${node.end}; PC = ${this.programState.currentStartLine}, ${this.programState.currentEndLine}`);
-        return null;
     }
 
     /*
@@ -58,55 +45,53 @@ class Visitor {
     *
     * */
     visitVariableDeclaration(node) {
-        this.programState.currentStartLine = node.start;
-        this.programState.currentEndLine = node.end;
         this.traversal.push(node);
-        console.log(` variable declaration statement VISITING: ${node.type} start: ${node.start} end ${node.end}; PC = ${this.programState.currentStartLine}, ${this.programState.currentEndLine}`);
         return null;
     }
     
     visitExpressionStatement(node) {
-        this.programState.currentStartLine = node.start;
-        this.programState.currentEndLine = node.end;
         this.traversal.push(node);
-        console.log(` expression statement VISITING: ${node.type}; PC = ${this.programState.currentStartLine}, ${this.programState.currentEndLine}`);
+        console.log(` expression statement VISITING: ${node.type}`);
         return null;
     }
 
     
-    visitForStatement(node) {
-        this.programState.currentStartLine = node.start;
-        this.programState.currentEndLine = node.end;     
-        this.traversal.push(node); 
+    visitForStatement(node) {  
+        // this.traversal.push(node); 
         // this.programState.loops.push(node);
-        console.log(`for statement VISITING ${node.type}; PC = ${this.programState.currentStartLine}, ${this.programState.currentEndLine}`);
-        traverse(node.body, new Visitor(copyObject(this.programState), copyObject(this.state)));     
-        return null;
+        console.log(`for statement VISITING ${node.type}; `);
+        this.traversal.push(node);
+        let forloopStart = this.traversal.length - 1;
 
+        if (node.update.prefix) {
+            this.traversal.push({start: node.update.start, end: node.update.end, resetProgramCounter: forloopStart});
+        }
+        traverse(node.body, new Visitor(this.traversal));    
+        if(!node.update.prefix) {
+            this.traversal.push({start: node.update.start, end: node.update.end, resetProgramCounter: forloopStart});
+        }
+        return null;
     }
 
     visitWhileStatement(node) {
-        console.log(`while statement VISITING ${node.type}; PC = ${this.programState.currentStartLine}, ${this.programState.currentEndLine}`);
-        this.programState.currentStartLine = node.start;
-        this.programState.currentEndLine = node.end;      
+        console.log(`while statement VISITING ${node.type};`);    
+        // this.traversal.push(node);
         this.traversal.push(node);
-        traverse(node.body, new Visitor(copyObject(this.programState), copyObject(this.state)));     
+        let whileLoopStart = this.traversal.length - 1;
+        traverse(node.body, new Visitor(this.traversal));  
+        this.traversal.push({resetProgramCounter: whileLoopStart});
         return null;
     }
 
-    visitCallExpression(node) {
-        this.programState.currentStartLine = node.start;
-        this.programState.currentEndLine = node.end;      
+    visitCallExpression(node) {     
         this.traversal.push(node);
-        console.log(`call statement VISITING ${node.type}; PC = ${this.programState.currentStartLine}, ${this.programState.currentEndLine}`);
+        console.log(`call statement VISITING ${node.type};`);
         return null;
     }
 
-    visitReturnStatement(node) {
-        this.programState.currentStartLine = node.start;
-        this.programState.currentEndLine = node.end;      
+    visitReturnStatement(node) { 
         console.log(
-            `return statement VISITING ${node.type}; PC = ${this.programState.currentStartLine}, ${this.programState.currentEndLine}`
+            `return statement VISITING ${node.type};`
         )
         this.traversal.push(node);
         return null;

@@ -4,3 +4,4 @@ function setInProgramState(state, variableDeclaration) {
     let init = variableDeclaration.declarations[0].init;
     state[decl.name] = init.raw;
 }
+
