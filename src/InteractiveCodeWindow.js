@@ -35,6 +35,19 @@ for(let i = 0; i < 8; i++) {
   }
 `
 
+const forLoopExamplePrefix = `
+let heatMap = [];
+for(let i = 0; i < 8; i++) {
+      let copyOfRow = [...knightGameState.boardState[i]]
+      for (let j = 0; j < 8; ++j) {
+          if (copyOfRow[j] === 0) {
+              copyOfRow[j] = Infinity;
+          }
+      }
+      heatMap.push(copyOfRow);
+  }
+`
+
 const knightHeatMapCode = `
 let heatMap = [];
 for(let i = 0; i < 8; i++) {
@@ -105,7 +118,7 @@ function CodeEditor(props) {
 
   function CodeDebugger() {
     const dispatch = useDispatch();
-    let code = forLoopExample;
+    let code = forLoopExamplePrefix;
     let ast = parseCodeIntoAst(code);
     let [programState, setProgramState] = useState(initState);
     let programCounter = useSelector((state) => {

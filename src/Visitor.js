@@ -20,6 +20,9 @@ function traverse(ast, v) {
         ReturnStatement: (node, state, c) => {
             v.visitReturnStatement(node);
         },
+        BinaryExpression: (node, state, c) => {
+            v.visitBinaryExpression(node);
+        }
 
     });
     console.log("TRAVERSAL ORDER");
@@ -55,21 +58,30 @@ class Visitor {
         return null;
     }
 
+    visitBinaryExpression(node) {
+        this.traversal.push(node);
+        console.log(` binary expression VISITING: ${node.type}`);
+        return null;
+    }
+
     
     visitForStatement(node) {  
         // this.traversal.push(node); 
         // this.programState.loops.push(node);
         console.log(`for statement VISITING ${node.type}; `);
-        this.traversal.push(node);
+        this.traversal.push(node.init);
+        this.traversal.push(node.test);
         let forloopStart = this.traversal.length - 1;
 
         if (node.update.prefix) {
-            this.traversal.push({start: node.update.start, end: node.update.end, resetProgramCounter: forloopStart});
+            this.traversal.push({start: node.update.start, end: node.update.end});
         }
         traverse(node.body, new Visitor(this.traversal));    
         if(!node.update.prefix) {
-            this.traversal.push({start: node.update.start, end: node.update.end, resetProgramCounter: forloopStart});
+            this.traversal.push({start: node.update.start, end: node.update.end});
         }
+        this.traversal.push({resetProgramCounter: forloopStart});
+
         return null;
     }
 
@@ -98,8 +110,5 @@ class Visitor {
     }
 }
 
-function copyObject(obj) {
-    return JSON.parse(JSON.stringify(obj));
-}
 
 export {Visitor, traverse};
