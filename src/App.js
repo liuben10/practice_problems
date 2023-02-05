@@ -6,8 +6,8 @@ import { InteractiveCodeWindow, CodeDebugger } from './InteractiveCodeWindow.js'
 import { Provider } from 'react-redux';
 import knightStore from './knightStore';
 
-function heatMap() {
-  return <ContentBox content={<KnightMoveProblem />} />
+function heatMap(stopAtState, id) {
+  return <ContentBox content={<KnightMoveProblem stopAtState={stopAtState} id={id} />} />
 }
 function title() {
   return <ContentBox content={
@@ -36,6 +36,45 @@ function explanationP1() {
   } />
 };
 
+// TODO replace with code window explanation
+function explanationP2() {
+  return <ContentBox content={
+    `
+     In other words, we can describe the algorithm with this pseudocode.
+
+     Initialize board with all zeroes
+     explore each of the nearest knight moves by assigning weights to each nearest first.
+     if each of the nearest knight moves can already have been reached by a shorter path, skip.
+       if not, continue exploring.
+     if there are no moves to explore. End.
+    `
+  } />
+}
+
+function explanationP3() {
+  return <ContentBox content={
+    `
+     This is the state of the board after initializing to all Infinity
+    `
+  } />
+}
+
+function explanationP4() {
+  return <ContentBox content={
+    `
+     This is the state of the board after taking the first knight step.
+    `
+  } />
+}
+
+function explanationP5() {
+  return <ContentBox content={
+    `
+     This is the state of the board after a conflict occurs when a knight sees a shorter path to a previously explored path
+    `
+  } />
+}
+
 function codeWindow() {
   return <Provider store={knightStore}><ContentBox content={<CodeDebugger />} /></Provider>;
 }
@@ -45,8 +84,15 @@ function getChessProblemArticle() {
     title(),
     problemDescription(),
     explanationP1(),
+    explanationP2(),
+    heatMap("initHeatMap", "initBoard"),
+    explanationP3(),
+    heatMap("firstKnightStep", "firstKnightStepBoard"),
+    explanationP4(),
+    heatMap("foundShorterPath", "shorterPathBoard"),
+    explanationP5(),
     // codeWindow(),
-    heatMap(),
+    heatMap("full", "finalBoard"),
   ]
 }
 

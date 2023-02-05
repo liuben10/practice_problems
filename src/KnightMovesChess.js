@@ -57,7 +57,7 @@ function copyState(knightGameState) {
     }
 }
 
-function generateHeatMap(knightGameState) {
+function generateHeatMap(knightGameState, stopAt) {
     let heatMap = [];
     for(let i = 0; i < 8; i++) {
         let copyOfRow = [...knightGameState.boardState[i]]
@@ -68,18 +68,28 @@ function generateHeatMap(knightGameState) {
         }
         heatMap.push(copyOfRow);
     }
+    if (stopAt === "initHeatMap") {
+        return heatMap;
+    }
     let [kI, kJ] = knightGameState.knightPos;
     let fringe = []
     let knightMoves = nextKnightMoves(kI,kJ);
     knightMoves.forEach((moveTuple) => fringe.push([moveTuple, 1]));
     while (fringe.length) {
+
         let [nextMov, steps] = fringe.shift();
+        if (steps === 2 && stopAt === "firstKnightStep") {
+            return heatMap;
+        }
         let [nextI, nextJ] = nextMov;
         heatMap[8-nextI-1][nextJ] = Math.min(heatMap[8-nextI-1][nextJ], steps);
         let nextMoves = nextKnightMoves(nextI, nextJ);
         nextMoves.forEach((moveTuple) => {
             let [nI, nJ] = moveTuple;
             if (heatMap[8-nI-1][nJ] > steps + 1) {
+                if (heatMap[8-nI-1][nJ] !== Infinity && heatMap[8-nI-1][nJ] > steps + 1 && stopAt === "foundShorterPath") {
+                    return heatMap;
+                }
                 fringe.push([[nI, nJ], steps + 1]);
             }
         })
