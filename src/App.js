@@ -1,5 +1,6 @@
 import { KnightMoveProblem } from './KnightMoveProblem.js'
 import './App.css';
+import './KnightMoveImage.css';
 import {ProblemDemo} from './ProblemDemo.js';
 import {ContentBox} from './ContentBox.js';
 import { InteractiveCodeWindow, CodeDebugger } from './InteractiveCodeWindow.js';
@@ -11,7 +12,7 @@ function heatMap(stopAtState, id) {
 }
 function title() {
   return <ContentBox content={
-    <h1>A Knights Tour</h1>
+    <h1>How does a knight move</h1>
   } />;
 }
 function problemDescription() {
@@ -75,6 +76,12 @@ function explanationP5() {
   } />
 }
 
+function knightMoveImage() {
+  return (<ContentBox content={
+    <img className="KnightMoveImage" src="./knight_move.png"/>
+  } />);
+}
+
 function codeWindow() {
   return <Provider store={knightStore}><ContentBox content={<CodeDebugger />} /></Provider>;
 }
@@ -83,6 +90,7 @@ function getChessProblemArticle() {
   return [
     title(),
     problemDescription(),
+    knightMoveImage(),
     explanationP1(),
     explanationP2(),
     heatMap("initHeatMap", "initBoard"),
