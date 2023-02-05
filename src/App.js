@@ -1,4 +1,4 @@
-import { KnightMoveProblem } from './KnightMoveProblem.js'
+import { KnightMoveProblem, KnightsTour} from './KnightMoveProblem.js'
 import './App.css';
 import './KnightMoveImage.css';
 import {ProblemDemo} from './ProblemDemo.js';
@@ -76,6 +76,14 @@ function explanationP5() {
   } />
 }
 
+function explanationP6() {
+  return <ContentBox content={
+    `
+     This is the kngihts tour problem
+    `
+  } />
+}
+
 function knightMoveImage() {
   return (<ContentBox content={
     <img className="KnightMoveImage" src="./knight_move.png"/>
@@ -101,6 +109,8 @@ function getChessProblemArticle() {
     explanationP5(),
     // codeWindow(),
     heatMap("full", "finalBoard"),
+    explanationP6(),
+    KnightsTour("knightsTour"),
   ]
 }
 

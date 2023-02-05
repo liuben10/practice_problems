@@ -1,4 +1,5 @@
 import {convertStateToFen, copyState, findKnightPos, generateHeatMap} from './KnightMovesChess.js';
+import {generateKnightsTour} from './KnightsTourChess.js';
 import { Chessboard } from 'react-chessboard';
 import { useState, useEffect } from 'react';
 import $ from 'jquery';
@@ -75,6 +76,29 @@ function initState() {
     }
 }
 
+function KnightsTour(props) {
+    let initialState = initState()
+    const [knightGameState, setBoardState] = useState(initialState);
+    let convertedFen = convertStateToFen(knightGameState.boardState);
+    
+    let pieceDrop = (srcSq, targSq, _p) => {
+        let newKnightGameState = copyState(knightGameState);
+        let [srcI, srcJ] = convertSqNotationToIJ(srcSq);
+        let [targI, targJ] = convertSqNotationToIJ(targSq);
+        newKnightGameState.boardState[8-srcI-1][srcJ] = 0;
+        newKnightGameState.boardState[8-targI-1][targJ] = -1;
+        newKnightGameState.knightPos = [targI, targJ];
+        setBoardState(newKnightGameState);
+        let tour = generateKnightsTour(newKnightGameState);
+        console.log(tour);
+    }
+    return (
+        <div className = "KnightTourProblem">
+            <Chessboard id={props.id} position={convertedFen} onPieceDrop = {pieceDrop} />
+        </div>
+    )
+}
+
 function KnightMoveProblem(props) {
     let initialState = initState()
     const [knightGameState, setBoardState] = useState(initialState);
@@ -99,4 +123,4 @@ function KnightMoveProblem(props) {
 }
 
 
-export { KnightMoveProblem, initState, renderHeatMap2}
+export { KnightMoveProblem, KnightsTour, initState, renderHeatMap2}
