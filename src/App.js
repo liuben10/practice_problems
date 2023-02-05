@@ -45,7 +45,7 @@ function getChessProblemArticle() {
     title(),
     problemDescription(),
     explanationP1(),
-    codeWindow(),
+    // codeWindow(),
     heatMap(),
   ]
 }

@@ -1,6 +1,6 @@
 import {convertStateToFen, copyState, findKnightPos, generateHeatMap} from './KnightMovesChess.js';
 import { Chessboard } from 'react-chessboard';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import $ from 'jquery';
 import './KnightMoveProblem.css';
 
@@ -26,11 +26,29 @@ function convertIJToSqNotation(ijNotation) {
     return cols[j] + (8-i);
 }
 
+function renderHeatMap2(heatmap) {
+    for(let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+            let ijconverted = convertIJToSqNotation([i, j]);
+            $(`div[data-square=${ijconverted}] #${ijconverted}`).remove();
+        }
+    }
+    for(let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+            let ijconverted = convertIJToSqNotation([i, j]);
+            if (heatmap[i][j] !== -1) {
+                $(`div[data-square=${ijconverted}]`).append(`<div id=${ijconverted} style="z-index: 3;  color: rgb(0, 0, 0); align-self: flex-end; font-size: 10px;">${heatmap[i][j]}</div>`);
+            }
+        }
+    }
+}
+
 function renderHeatMap(heatmap) {
     for(let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
             let ijconverted = convertIJToSqNotation([i, j]);
             let heatmapLevel = colorScale[heatmap[i][j]];
+            // $(`div[data-square=${ijconverted}]`).css('background-color', `${heatmapLevel}`);
             $(`div[data-square=${ijconverted}]`).css('background-color', `${heatmapLevel}`);
         }
     }
@@ -57,8 +75,6 @@ function KnightMoveProblem() {
     let initialState = initState()
     const [knightGameState, setBoardState] = useState(initialState);
     let convertedFen = convertStateToFen(knightGameState.boardState);
-    let heatMap = generateHeatMap(knightGameState);
-    renderHeatMap(heatMap);
     
     let pieceDrop = (srcSq, targSq, _p) => {
         let newKnightGameState = copyState(knightGameState);
@@ -69,7 +85,7 @@ function KnightMoveProblem() {
         newKnightGameState.knightPos = [targI, targJ];
         setBoardState(newKnightGameState);
         let heatMap = generateHeatMap(newKnightGameState);
-        renderHeatMap(heatMap);
+        renderHeatMap2(heatMap);
     }
     return (
         <div className = "KnightMoveProblem">
