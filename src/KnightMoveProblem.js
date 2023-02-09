@@ -48,6 +48,23 @@ function renderHeatMap2(heatmap, id) {
     }
 }
 
+function renderTour(tour, id) {
+    for(let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+            let ijconverted = convertIJToSqNotation([i, j]);
+            $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}] #${ijconverted}`).remove();
+        }
+    }
+    for(let i = 0; i < 8; i++) {
+        for(let j = 0; j < 8; j++) {
+            let ijconverted = convertIJToSqNotation([i,j]);
+            if (tour[i][j] !== -1) {
+                $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}]`).append(`<div id=${ijconverted} style="z-index: 3;  color: rgb(0, 0, 0); align-self: flex-end; font-size: 60px;">${tour[i][j]}</div>`);
+            }
+        }
+    }
+}
+
 function renderHeatMap(heatmap) {
     for(let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
@@ -91,9 +108,12 @@ function KnightsTour(props) {
         setBoardState(newKnightGameState);
         let tour = generateKnightsTour(newKnightGameState);
         console.log(tour);
+        if (tour) {
+            renderTour(tour, props.id);
+        }
     }
     return (
-        <div className = "KnightTourProblem">
+        <div className = "KnightMoveProblem">
             <Chessboard id={props.id} position={convertedFen} onPieceDrop = {pieceDrop} />
         </div>
     )

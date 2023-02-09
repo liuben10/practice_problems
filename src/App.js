@@ -94,6 +94,12 @@ function codeWindow() {
   return <Provider store={knightStore}><ContentBox content={<CodeDebugger />} /></Provider>;
 }
 
+function knightsTour() {
+  return (<ContentBox content={
+    <KnightsTour id="knightsTour" />
+  }/>);
+}
+
 function getChessProblemArticle() {
   return [
     title(),
@@ -110,7 +116,7 @@ function getChessProblemArticle() {
     // codeWindow(),
     heatMap("full", "finalBoard"),
     explanationP6(),
-    KnightsTour("knightsTour"),
+    knightsTour(),
   ]
 }
 
