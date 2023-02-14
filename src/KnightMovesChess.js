@@ -10,33 +10,40 @@ function findKnightPos(board) {
 }
 
 
-function nextKnightMoves(kI, kJ) {
+function nextKnightMoves(kI, kJ, boardSize=8) {
     let moves = [];
-    if (kI + 2 < 8 && kJ + 1 < 8) {
+    if (kI + 2 < boardSize && kJ + 1 < boardSize) {
         moves.push([kI + 2, kJ + 1]);
     }
-    if (kI + 2 < 8 && kJ - 1 >= 0) {
+    if (kI + 2 < boardSize && kJ - 1 >= 0) {
         moves.push([kI + 2, kJ - 1]);
     }
-    if (kI + 1 < 8 && kJ + 2 < 8) {
+    if (kI + 1 < boardSize && kJ + 2 < boardSize) {
         moves.push([kI + 1, kJ + 2]);
     }
-    if (kI + 1 < 8 && kJ - 2 >= 0) {
+    if (kI + 1 < boardSize && kJ - 2 >= 0) {
         moves.push([kI + 1, kJ - 2]);
     }
-    if (kI - 2 >= 0 && kJ + 1 < 8) {
+    if (kI - 2 >= 0 && kJ + 1 < boardSize) {
         moves.push([kI - 2, kJ + 1]);
     }
     if (kI - 2 >= 0 && kJ - 1 >= 0) {
         moves.push([kI - 2, kJ - 1]);
     }
-    if (kI - 1 >= 0 && kJ + 2 < 8) {
+    if (kI - 1 >= 0 && kJ + 2 < boardSize) {
         moves.push([kI - 1, kJ + 2]);
     }
     if (kI - 1 >= 0 && kJ - 2 >= 0) {
         moves.push([kI - 1, kJ - 2]);
     }
     return moves;
+}
+
+function copyStats(stats) {
+    return {
+        'tourSteps': stats.tourSteps,
+        'backtrackingSteps': stats.backtrackingSteps,
+    }
 }
 
 function copyBoard(boardState) {
@@ -51,10 +58,20 @@ function copyBoard(boardState) {
 function copyState(knightGameState) {
     let copyOfBoardState = copyBoard(knightGameState.boardState);
     let copyOfKnight = [...knightGameState.knightPos];
+    let copyOfVisited = copyBoard(knightGameState.visited);
+    let copyOfTourStep = knightGameState.currentTourStep;
+    let copyOfTourSoFar = [...knightGameState.tourSoFar];
+    let copyOfStats = copyStats(knightGameState.stats);
     return {
         'boardState': copyOfBoardState,
         'knightPos': copyOfKnight,
-    }
+        'visited': copyOfVisited,
+        'currentTourStep': copyOfTourStep,
+        'error': knightGameState.error,
+        'tourSoFar': copyOfTourSoFar,
+        'backtracking': [...knightGameState.backtracking],
+        'stats': copyOfStats,
+    };
 }
 
 function generateHeatMap(knightGameState, stopAt) {
@@ -135,4 +152,4 @@ function convertStateToFen(board) {
     return fenString;
 }
 
-export {convertStateToFen, copyState, findKnightPos, nextKnightMoves, generateHeatMap};
+export {convertStateToFen, copyState, findKnightPos, nextKnightMoves, generateHeatMap, copyBoard};

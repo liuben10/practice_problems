@@ -1,4 +1,5 @@
 .KnightMoveProblem {
     width: 30%;
-    height: 30%
+    height: 30%;
+    overflow: auto;
 }

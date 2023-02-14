@@ -1,3 +1,5 @@
 .ContentBox {
     padding-top:100px;
+    overflow-wrap: break-word; 
+    width: 80%
 }

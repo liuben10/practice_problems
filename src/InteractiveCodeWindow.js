@@ -143,4 +143,4 @@ function CodeEditor(props) {
 
   }
 
-  export {InteractiveCodeWindow, CodeDebugger};
+  export {InteractiveCodeWindow, CodeDebugger, HighlightableCodeBloc};

@@ -12,6 +12,61 @@ function heuristic(visited, mt) {
     }
     return cnt;
 }
+
+
+function copyTour(tour) {
+    let copyOfTour = []
+    for(let t of tour) {
+        copyOfTour.push(t);
+    }
+    return copyOfTour;
+}
+
+function generateKnightsTourSolutionBacktrackingHelper(visited, kI, kJ, step, backtrackingSteps, tourSteps) {
+    visited[8-kI-1][kJ] = step;
+    if (step === 36) {
+        return {'solution': visited, 'tourSteps': tourSteps[0], 'backtrackingSteps': backtrackingSteps[0]}
+    }
+    let next = nextKnightMoves(kI, kJ, 6);
+    for (let moveTuple of next) {
+        tourSteps[0] += 1
+        if (visited[8-moveTuple[0]-1][moveTuple[1]] !== 0) {
+            continue;
+        }
+        let foundTour = generateKnightsTourSolutionBacktrackingHelper(visited, moveTuple[0], moveTuple[1], step + 1, backtrackingSteps, tourSteps);
+        if (foundTour) {
+            return {'solution': visited, 'tourSteps': tourSteps[0], 'backtrackingSteps': backtrackingSteps[0]};
+        } else {
+            visited[8-moveTuple[0]-1][moveTuple[1]] = 0;
+            backtrackingSteps[0] += 1;
+        }
+    }   
+    return null;
+}
+
+function generateKnightsTourSolutionBacktracking(knightGameState) {
+    let [kI, kJ] = knightGameState.knightPos;
+    let visited = [];
+    let backtrackingSteps = [0];
+    let tourSteps = [0];
+    let step = 1;
+    for(let i = 0; i< 8; i++) {
+        let copyOfRow = [...knightGameState.boardState[i]];
+        visited.push(copyOfRow);
+    }
+    let next = nextKnightMoves(kI, kJ, 6);
+    for (let moveTuple of next) {
+        let foundTour = generateKnightsTourSolutionBacktrackingHelper(visited, moveTuple[0], moveTuple[1], step, backtrackingSteps, tourSteps);
+        if (foundTour) {
+            return foundTour;
+        } else {
+            visited[8-moveTuple[0]-1][moveTuple[1]] = 0;
+            backtrackingSteps[0] += 1;
+        }
+    }
+    return null;
+}
+
 function generateTourHelper(visited, i, j, step) {
     visited[8-i-1][j] = step;
     let next = nextKnightMoves(i, j);
@@ -66,4 +121,4 @@ function generateKnightsTour(knightGameState) {
     }
 }
 
-export {generateKnightsTour};
+export {generateKnightsTour, generateKnightsTourSolutionBacktracking};
