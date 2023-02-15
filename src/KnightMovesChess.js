@@ -65,6 +65,8 @@ function copyState(knightGameState) {
     return {
         'boardState': copyOfBoardState,
         'knightPos': copyOfKnight,
+        'nextKnightMoves': knightGameState.nextKnightMoves,
+        'nextKnightMoveIndex': knightGameState.nextKnightMoveIndex,
         'visited': copyOfVisited,
         'currentTourStep': copyOfTourStep,
         'error': knightGameState.error,

@@ -1,5 +1,5 @@
 import {convertStateToFen, copyState, findKnightPos, generateHeatMap, nextKnightMoves, copyBoard} from './KnightMovesChess.js';
-import {generateKnightsTour, generateKnightsTourSolutionBacktracking} from './KnightsTourChess.js';
+import {generateKnightsTour, generateKnightsTourSolutionBacktracking, heuristic} from './KnightsTourChess.js';
 import { Chessboard } from 'react-chessboard';
 import { useState, useEffect } from 'react';
 import $ from 'jquery';
@@ -81,9 +81,9 @@ function renderHeatMap(heatmap) {
     }
 }
 
-function initState() {
+function initState(kI = 0, kJ = 0) {
     let initialBoardState = [
-        [-1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
@@ -92,9 +92,12 @@ function initState() {
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
     ];
+    initialBoardState[kI][kJ] = -1;
     return {
         'boardState': initialBoardState,
         'knightPos': findKnightPos(initialBoardState),
+        'nextKnightMoves': [],
+        'nextKnightMoveIndex': 0,
         'currentTourStep': 1,
         'visited': copyBoard(initialBoardState),
         'error': null,
@@ -150,6 +153,103 @@ function KnightsTour(props) {
     return (
         <div className = "KnightMoveProblem">
             <Chessboard id={props.id} position={convertedFen} onPieceDrop = {pieceDrop} />
+        </div>
+    )
+}
+
+function InteractiveKnightTourHeuristic(props) {
+    // NOTE: Warnsdorff only really works without much backtracking for some squares.
+    // Squares in the corner or on the edge give Warnsdorff alot of trouble
+    let initialState = initState(3, 3);
+    const [knightGameState, setBoardState] = useState(initialState);
+    let convertedFen = convertStateToFen(knightGameState.boardState);
+    
+    // TODO rendering is wonky.
+    let nextFunc = () => {
+        let newKnightGameState = copyState(knightGameState);
+        let [srcI, srcJ] = (newKnightGameState.knightPos);
+        // let [targI, targJ] = convertSqNotationToIJ(targSq);
+        if (newKnightGameState.currentTourStep === 64) {
+            newKnightGameState.error = "SUCCESS! You found a Knights tour!";
+            setBoardState(newKnightGameState);
+            return;
+        }
+        let sortedKnightMoves = []
+        if (newKnightGameState.nextKnightMoves.length === 0) {
+            newKnightGameState.backtracking = [];
+            let nextKM = nextKnightMoves(srcI, srcJ);
+            let filteredKnightMoves = [];
+            for(let knightMove of nextKM) {
+                let [targI, targJ] = knightMove;
+                let foundInBacktrack = false;
+                for(let backTrack of newKnightGameState.backtracking) {
+                    if (backTrack[0] === targI && backTrack[1] === targJ) {
+                        foundInBacktrack = true;
+                    }
+                }
+                if (newKnightGameState.visited[8-targI-1][targJ] === 0
+                    && !foundInBacktrack) {
+                    filteredKnightMoves.push([targI, targJ]);
+                }
+            }
+            sortedKnightMoves.push(...filteredKnightMoves.sort((mt1, mt2) => {
+                let h1 = heuristic(newKnightGameState.visited, mt1);
+                let h2 = heuristic(newKnightGameState.visited, mt2);
+                return  h1 - h2;
+            }));
+        } else {
+            sortedKnightMoves.push(...newKnightGameState.nextKnightMoves);
+        }
+        
+        if (newKnightGameState.nextKnightMoves.length === 0) {
+            newKnightGameState.tourSoFar.push({
+                knightPos: newKnightGameState.knightPos, 
+                nextKnightMoves: sortedKnightMoves,
+                nextKnightMoveIndex: 0
+            });
+        }
+
+        if (sortedKnightMoves.length === 0 || (newKnightGameState.nextKnightMoveIndex >= sortedKnightMoves.length)) {
+            newKnightGameState.tourSoFar.pop();
+            let lastKnightMoveState = newKnightGameState.tourSoFar.pop();
+            let [targI, targJ] = lastKnightMoveState.knightPos;
+
+            newKnightGameState.nextKnightMoves = [...lastKnightMoveState.nextKnightMoves];
+            newKnightGameState.nextKnightMoveIndex = lastKnightMoveState.nextKnightMoveIndex + 1;
+            newKnightGameState.tourSoFar.push({
+                knightPos: lastKnightMoveState.knightPos,
+                nextKnightMoves: sortedKnightMoves,
+                nextKnightMoveIndex: lastKnightMoveState.nextKnightMoveIndex + 1,
+            });
+            newKnightGameState.boardState[8-srcI-1][srcJ] = 0;
+            newKnightGameState.boardState[8-targI-1][targJ] = -1;
+            newKnightGameState.visited[8-srcI-1][srcJ] = 0;
+            newKnightGameState.currentTourStep -= 1;
+            newKnightGameState.knightPos = [targI, targJ];
+            newKnightGameState.backtracking.push([srcI, srcJ]);
+            renderTour(newKnightGameState.visited, props.id);
+            setBoardState(newKnightGameState);
+            return;
+        }
+        let knightMove = sortedKnightMoves[newKnightGameState.nextKnightMoveIndex];
+        let [targI, targJ] = knightMove;
+        newKnightGameState.boardState[8-srcI-1][srcJ] = 0;
+        newKnightGameState.boardState[8-targI-1][targJ] = -1;
+        newKnightGameState.visited[8-srcI-1][srcJ] = newKnightGameState.currentTourStep;
+        newKnightGameState.knightPos = [targI, targJ];
+        newKnightGameState.currentTourStep += 1;
+        newKnightGameState.nextKnightMoves = [];
+        newKnightGameState.nextKnightMoveIndex = 0;
+        renderTour(newKnightGameState.visited, props.id);
+        setBoardState(newKnightGameState);
+        return;
+       
+    }
+    return (
+        <div className = "KnightMoveProblem">
+            <div class="ErrorContainer">{knightGameState.error}</div>
+            <button onClick={nextFunc}>next</button>
+            <Chessboard id={props.id} position={convertedFen} />
         </div>
     )
 }
@@ -318,4 +418,13 @@ function KnightMoveProblem(props) {
 }
 
 
-export { KnightMoveProblem, KnightsTour, initState, renderHeatMap2, InteractiveKnightTour, KnightsTourBacktracking, InteractiveKnightTourBacktracking}
+export { 
+    InteractiveKnightTourHeuristic, 
+    KnightMoveProblem,
+    KnightsTour,
+    initState, 
+    renderHeatMap2, 
+    InteractiveKnightTour, 
+    KnightsTourBacktracking, 
+    InteractiveKnightTourBacktracking
+}

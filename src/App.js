@@ -1,4 +1,4 @@
-import { KnightMoveProblem, KnightsTour, KnightsTourBacktracking, InteractiveKnightTour, InteractiveKnightTourBacktracking} from './KnightMoveProblem.js'
+import { KnightMoveProblem, KnightsTour, KnightsTourBacktracking, InteractiveKnightTour, InteractiveKnightTourBacktracking, InteractiveKnightTourHeuristic} from './KnightMoveProblem.js'
 import './App.css';
 import './KnightMoveImage.css';
 import {ProblemDemo} from './ProblemDemo.js';
@@ -44,80 +44,15 @@ function fibonacci(startline = 0, endline = 0) {
 }
 function backTrackingPseudoCode() {
   let backtrackingPseudocode = `    
-    function solve(startPos) {
+    Given that I am at a particular square on the chessboard.
 
-      // At the start of the program, initialize
-      // the entire game state as unvisited since we are beginning our solution.
-      // The result of initialization is an empty 8x8 chessboard with a knight
-      // placed at the start position.
+    Mark my current path that I have travelled so far.
 
-      visited = initialize_empty_visited(startPos)
+    If I am able to still visit a path, visit it.
 
-      // From the initial starting position, find the nearest knight moves.
-
-      nextKnightMoves = find_nearest_knight_moves(startPos)
-
-      // For each of the nearest knight moves.
-
-      for_each(knightMove in nextKnightMoves) {
-
-        // We will try to find a solution starting with one
-        // of the nearest knight moves.
-
-        step = 1
-        foundTour = solveHelper(knightMove, visited, step);
-
-        // If we have found a tour,
-
-        if (foundTour) {
-
-          // Then return the properly toured visited.
-
-          return visited;
-        } else {
-
-          // Otherwise, if we had followed that path starting at knightMove,
-          // we ultimately would've ended up in a dead end so we have to 'unvisit' that move.
-          // This is akin to the part where we have to pick up our crumb when lost in the woods,
-          // since now we can 
-
-          visited.at(knightMove) = 0
-        }
-      }
-      return tour_not_found        
-    }
-
-    solveHelper(startPos, visited, step) {
-      // We have to visit the current starting position by leaving a 'crumb'
-      // In this case, the crumb that we are leaving is the current step that we
-      // are on.
-
-      visited.at(startPos) = step
-
-      // Find the next nearest knight moves that we can get to from my current startPos.
-
-      nextKnightMoves = find_nearest_knight_moves(startPos)
-
-      // For each nearest knight move.
-
-      for_each(knightMove in nextKnightMoves) {
-
-        // try to find a solution for each of the next knightMoves.
-
-        foundTour = solveHelper(knightMove, visited, step+1)
-
-        // if we find a solution, return the tiled chessboard.
-        if (foundTour) {
-          return visited
-        } else {
-          // Otherwise, if we had followed that path, we would've reached a dead end, and
-          // thus, we have to un-visit that path.
-          visited.at(knightMove) = 0
-        }
-      }
-
-      return tour_not_found
-    }
+    Otherwise, I need to look back at my journey so far,
+    and then keep going backwards until I reach a part of my journey
+    where there are still more paths to travel down.
   `
   return <ContentBox content={
     <HighlightableCodeBloc code={backtrackingPseudocode} startLine={0} endLine={0} />
@@ -181,6 +116,12 @@ function knightsTourBacktracking() {
   return (<ContentBox content={
     <KnightsTourBacktracking id="knightsTourBacktracking" />
   }/>)
+}
+
+function interactiveKnightsTourHeuristic() {
+  return (<ContentBox content={
+    <InteractiveKnightTourHeuristic id="interactiveHeuristicKnightsTour" />
+  }/>);
 }
 
 function knightsTour() {
@@ -284,10 +225,23 @@ function getChessProblemArticle() {
     In fact, there are roughly 4^51 possible different move sequences on an 8x8 board so this is far too intractable to just solve naively.`),
     paragraph(`However, we can use backtracking to solve for a smaller board. Below, I have an implementation using backtracking for a 6x6 board.
     This is a much more reasonable problem because there's only 6,637,920 directed closed tours on a 6x6 board rather than 19 quintrillion closed directed tours`),
+    paragraph(`Backtracking is a useful technique to know for solving certain problems such as Sudoku, or 
+    CSP type problems during leetcode interviews. In practicality, we don't utilize backtracking so much (or at least we would
+      use more advanced techniques such as arc consistency to prune some of our backtracking)`),
     knightsTourBacktracking(),
-    H2(`Warnsdorff`),
-    knightsTour(),
-    H2(`Computability`),
+    H2(`Warnsdorff - A Remarkably good heuristic.`),
+    paragraph(`One technique we can use to prune the search space would be to use something called a heuristic to evaluate the possible
+    moves, and choose the best move in our current situation.
+    
+    A heuristic is a type of function that takes children states (in each case, every next move), and produces a score (just a number).
+    The algorithm uses the heurstic to determine without traversing any particular path, which route best to take. This technique
+    is oftentimes used in chess engines for determining what are the best moves. It is very powerful since it can essentially
+    cut down a ton of backtracking for us.`),
+    interactiveKnightsTourHeuristic(),
+    paragraph(`Note that while this may work for some instances, it actually still fails for some other squares where we could run into
+    situations where we may have to revert back to backtracking. In this case, it is hard to determine whether or not Warnsdorff will always
+    give us a solution. This problem of determining if there was a way to predict whether or not a program will halt or not, is a very interesting 
+    topic in Computer Science but essentially, it is indeterminable.`),
   ]
 }
 

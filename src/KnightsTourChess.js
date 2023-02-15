@@ -121,4 +121,4 @@ function generateKnightsTour(knightGameState) {
     }
 }
 
-export {generateKnightsTour, generateKnightsTourSolutionBacktracking};
+export {generateKnightsTour, generateKnightsTourSolutionBacktracking, heuristic};
