@@ -262,75 +262,78 @@ function InteractiveKnightTourBacktracking(props) {
     // TODO rendering is wonky.
     let nextFunc = () => {
         let newKnightGameState = copyState(knightGameState);
-        let renderFunc = (boardId, ijconverted, tour, i, j, knightGameState) => {
-            let idx = 1;
-            for(let step of knightGameState.tourSoFar) {
-                let ijconverted = convertIJToSqNotation([8-step[0]-1, step[1]]);
-                let color = colorScale[Math.floor(Math.random() * colorScale.length)];
-                $(`div[data-boardid=${boardId}]`).find(`div[data-square=${ijconverted}] #${ijconverted}`).remove();
-                $(`div[data-boardid=${boardId}]`).find(`div[data-square=${ijconverted}]`).css('background-color', `${color}`).append(`<div id=${ijconverted} style="z-index: 3;  color: rgb(0, 0, 0); align-self: flex-end; font-size: 5px;">${idx}</div>`);
-                idx += 1;
-            }
-            let dark = 'rgb(181, 136, 99)';
-            let light = 'rgb(240, 217, 181)';
-            let knightPos = knightGameState.knightPos;
-            let kIJConverted = convertIJToSqNotation([8-knightPos[0]-1, knightPos[1]]);
-
-            $(`div[data-boardid=${boardId}]`).find(`div[data-square=${kIJConverted}] #${kIJConverted}`).remove();
-            if (knightPos[1] % 2 === 0 && knightPos[0] % 2 === 0 ||
-                knightPos[1] % 2 === 1 && knightPos[1] % 2 === 1) {
-                $(`div[data-boardid=${boardId}]`).find(`div[data-square=${ijconverted}]`).css('background-color', `${light}`)
-            } else {
-                $(`div[data-boardid=${boardId}]`).find(`div[data-square=${ijconverted}]`).css('background-color', `${dark}`)
-            }
-        }
-        let [srcI, srcJ] = (knightGameState.knightPos);
-        newKnightGameState.tourSoFar.push(knightGameState.knightPos);
+        let [srcI, srcJ] = (newKnightGameState.knightPos);
         // let [targI, targJ] = convertSqNotationToIJ(targSq);
-        if (newKnightGameState.currentTourStep === 63) {
+        if (newKnightGameState.currentTourStep === 64) {
             newKnightGameState.error = "SUCCESS! You found a Knights tour!";
             setBoardState(newKnightGameState);
             return;
         }
-        let nextKM = nextKnightMoves(srcI, srcJ);
-        let filteredKnightMoves = [];
-        for(let knightMove of nextKM) {
-            let [targI, targJ] = knightMove;
-            let foundInBacktrack = false;
-            for(let backTrack of newKnightGameState.backtracking) {
-                if (backTrack[0] === targI && backTrack[1] === targJ) {
-                    foundInBacktrack = true;
+        let sortedKnightMoves = []
+        if (newKnightGameState.nextKnightMoves.length === 0) {
+            newKnightGameState.backtracking = [];
+            let nextKM = nextKnightMoves(srcI, srcJ);
+            let filteredKnightMoves = [];
+            for(let knightMove of nextKM) {
+                let [targI, targJ] = knightMove;
+                let foundInBacktrack = false;
+                for(let backTrack of newKnightGameState.backtracking) {
+                    if (backTrack[0] === targI && backTrack[1] === targJ) {
+                        foundInBacktrack = true;
+                    }
+                }
+                if (newKnightGameState.visited[8-targI-1][targJ] === 0
+                    && !foundInBacktrack) {
+                    filteredKnightMoves.push([targI, targJ]);
                 }
             }
-            if (newKnightGameState.visited[8-targI-1][targJ] === 0
-                && !foundInBacktrack) {
-                filteredKnightMoves.push([targI, targJ]);
-            }
+            sortedKnightMoves.push(...filteredKnightMoves);
+        } else {
+            sortedKnightMoves.push(...newKnightGameState.nextKnightMoves);
         }
-        if (filteredKnightMoves.length === 0) {
+        
+        if (newKnightGameState.nextKnightMoves.length === 0) {
+            newKnightGameState.tourSoFar.push({
+                knightPos: newKnightGameState.knightPos, 
+                nextKnightMoves: sortedKnightMoves,
+                nextKnightMoveIndex: 0
+            });
+        }
+
+        if (sortedKnightMoves.length === 0 || (newKnightGameState.nextKnightMoveIndex >= sortedKnightMoves.length)) {
             newKnightGameState.tourSoFar.pop();
-            let lastKnightMove = newKnightGameState.tourSoFar.pop();
-            let [targI, targJ] = lastKnightMove;
+            let lastKnightMoveState = newKnightGameState.tourSoFar.pop();
+            let [targI, targJ] = lastKnightMoveState.knightPos;
+
+            newKnightGameState.nextKnightMoves = [...lastKnightMoveState.nextKnightMoves];
+            newKnightGameState.nextKnightMoveIndex = lastKnightMoveState.nextKnightMoveIndex + 1;
+            newKnightGameState.tourSoFar.push({
+                knightPos: lastKnightMoveState.knightPos,
+                nextKnightMoves: sortedKnightMoves,
+                nextKnightMoveIndex: lastKnightMoveState.nextKnightMoveIndex + 1,
+            });
             newKnightGameState.boardState[8-srcI-1][srcJ] = 0;
             newKnightGameState.boardState[8-targI-1][targJ] = -1;
             newKnightGameState.visited[8-srcI-1][srcJ] = 0;
             newKnightGameState.currentTourStep -= 1;
             newKnightGameState.knightPos = [targI, targJ];
             newKnightGameState.backtracking.push([srcI, srcJ]);
-            renderTour(newKnightGameState.visited, props.id, renderFunc, false, newKnightGameState);
+            renderTour(newKnightGameState.visited, props.id);
             setBoardState(newKnightGameState);
             return;
         }
-            let knightMove = filteredKnightMoves[0];
-            let [targI, targJ] = knightMove;
-            newKnightGameState.boardState[8-srcI-1][srcJ] = 0;
-            newKnightGameState.boardState[8-targI-1][targJ] = -1;
-            newKnightGameState.visited[8-srcI-1][srcJ] = newKnightGameState.currentTourStep;
-            newKnightGameState.knightPos = [targI, targJ];
-            newKnightGameState.currentTourStep += 1;
-            renderTour(newKnightGameState.visited, props.id, renderFunc, false, newKnightGameState);
-            setBoardState(newKnightGameState);
-            return;
+        let knightMove = sortedKnightMoves[newKnightGameState.nextKnightMoveIndex];
+        let [targI, targJ] = knightMove;
+        newKnightGameState.boardState[8-srcI-1][srcJ] = 0;
+        newKnightGameState.boardState[8-targI-1][targJ] = -1;
+        newKnightGameState.visited[8-srcI-1][srcJ] = newKnightGameState.currentTourStep;
+        newKnightGameState.knightPos = [targI, targJ];
+        newKnightGameState.currentTourStep += 1;
+        newKnightGameState.nextKnightMoves = [];
+        newKnightGameState.nextKnightMoveIndex = 0;
+        renderTour(newKnightGameState.visited, props.id);
+        setBoardState(newKnightGameState);
+        return;
     }
     return (
         <div className = "KnightMoveProblem">
