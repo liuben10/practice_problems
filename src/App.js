@@ -165,7 +165,7 @@ function getChessProblemArticle() {
     paragraph(` A refresher on the Fibonacci sequence. It
      is defined as such: The nth term in the sequence is the
       sum of the n-1 and the n-2 term in the same sequence, starting at 1. 
-      The first few terms of the sequence when enumerated is 1,2,3,5,8...`),
+      The first few terms of the sequence when enumerated is 1,1,2,3,5,8...`),
     fibonacci(),
     paragraph(`To understand how this algorithm works, basically,
      the first line defines that we are declaring a function
