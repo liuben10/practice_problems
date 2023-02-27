@@ -44,15 +44,35 @@ function fibonacci(startline = 0, endline = 0) {
 }
 function backTrackingPseudoCode() {
   let backtrackingPseudocode = `    
-    Given that I am at a particular square on the chessboard.
+    Create an empty chess board. (We will be using this chess board to mark which squares we have visited. This chess board will have no squares marked at first, since we haven't traveled to any squares.)
 
-    Mark my current path that I have travelled so far.
+    Create a list of all the squares we have visited (in the order that we visited them) that have taken us to this current square we are on. (This list will be empty at first, since we haven't traveled to any square yet.) We will call this list the path.
 
-    If I am able to still visit a path, visit it.
+    (As we move to a new square, we will update this chess board (by marking the current square as visited) to reflect the squares we have traveled to thusfar (given the path that we have taken), and we will also update the path by adding the current square to the list.)
+  
+    Start on any square of the chess board.  
 
-    Otherwise, I need to look back at my journey so far,
-    and then keep going backwards until I reach a part of my journey
-    where there are still more paths to travel down.
+    Define a function called KnightsTour which takes as an input: the square that you are on, the path (that has taken us to this current square), and the chess board (with the squares that have been visited marked with X's). The KnightsTour function's output is a boolean (a true or false) that represents whether or not we have found a tour.
+
+    The KnightsTour function is defined as follows:
+
+      If the length of the path we have traveled to (with this current path) is less than 64 (the total number of squares on a chess board):
+
+        Mark the current square that I am on as visited. (On the chess board, mark this current square with an X.)
+
+        Add this current square to the path that has taken us to this current square.
+
+        Make a list of all the possible squares that I could travel to from my current square.
+
+        If any of these squares have already been visited (i.e. they already have an X on them on the chessboard), cross them off the list.
+
+        If there are no unvisited squares in this list, then return false.
+
+        For each square in the list of unvisited squares, choose that square, and name it the new square. 
+
+          Call the KnightsTour function with this new square, updated path, and updated chess board as its input.
+          If this recursive call is true, then return true.
+          Otherwise, unmark the previously visited move.
   `
   return <ContentBox content={
     <HighlightableCodeBloc code={backtrackingPseudocode} startLine={0} endLine={0} />
@@ -63,7 +83,9 @@ function fibonacci4() {
     fib(4)
     => fib(3) + fib(2)
     => fib(2) + fib(1) + fib(1) + fib(0)
-    => fib(1)=1 + fib(0)=1 + fib(1)=1 + fib(1)=1 + fib(0)=1 == 5
+    => fib(1) + fib(0) +    1   +    1    +   1
+    => 1      +   1    +    1   +    1    +   1
+    => 5
 
   i:        0, 1, 2, 3, 4
   fib(i):   1, 1, 2, 3, 5
@@ -71,33 +93,6 @@ function fibonacci4() {
   return <ContentBox content={
     <HighlightableCodeBloc code={fibonacci4} startLine={0} endLine={0} />
   } />
-}
-
-function knightMoveImage() {
-  return (<ContentBox content={
-    <img className="KnightMoveImage" src="./knight_move.png"/>
-  } />);
-}
-
-function knightsTourGraph() {
-  return (<ContentBox content={
-    <img className="KnightMoveImage" src="./knights_move_graph.png"/>
-  } />);
-}
-
-function socialNetworkGraph() {
-  return (<ContentBox content={
-    <img className="KnightMoveImage" src="./social_network.jpg"/>
-  } />);
-}
-function hanselAndGretelImage() {
-  return (<ContentBox content={
-    <img className="KnightMoveImage" src="./HanselandGretelCropped.png"/>
-  } />);
-}
-
-function codeWindow() {
-  return <Provider store={knightStore}><ContentBox content={<CodeDebugger />} /></Provider>;
 }
 
 function interactiveBacktracking() {
@@ -124,6 +119,12 @@ function interactiveKnightsTourHeuristic() {
   }/>);
 }
 
+function img(img_url) {
+  return <ContentBox content={
+    <img className="KnightMoveImage" src={img_url} /> 
+  } />
+}
+
 function knightsTour() {
   return (<ContentBox content={
     <KnightsTour id="knightsTour" />
@@ -139,15 +140,15 @@ function getChessProblemArticle() {
     including Leonard Euler. It was first mentioned in the 9th century AD in Sanskrit poetry in Rudrata's Kavyalankara where
     the author prescribed a way to use a knight's tour to write out the syllables of a poem. It was later more thoroughly studied and in the 18th century and is still studied to this very day.`),
     H2(`Introduction`),
-    paragraph(`A knight is a specific piece in the game of Chess. It can only move'
-    two steps in one direction and one step perpendicular to the direction it just moved in.`),
+    paragraph(`Chess is a game played on an 8x8 board with 16 different pieces. Each kind of piece has its own way of moving
+    in the game of chess. The King can move in any direction but only one square. The queen is like the king except not limited
+    to just one square. The pawn can move forward and only capture diagonally. The rook can only move perpendicularly. The bishop can only move diagonally and the knight only moves two squares forward and then one square to the left or right.`),
     paragraph(`Here's a graphic capturing this`),
-    knightMoveImage(),
-    paragraph(`The important thing is that at most, a knight can only move to up to 8 squares, although you will notice that as the knight moves
-    closer to the edge, it will get less moves. This is because in the game of Chess, you cannot move over the edge. (Chess is not played on an infinite board).`),
+    img("./knight_move.png"),
+    paragraph(`The knight has at most 8 possible squares it can move to and it cannot move over the edge of the board.`),
     H2(`Problem`),
     paragraph(`"I found myself one day in company where, on the occasion of a game of chess, someone proposed this question: to traverse with a knight all the cells of the chessboard, without ever arriving twice at the same, and commencing from a given cell." -- Leonard Euler`),
-    paragraph(`Or in plainer english, given a knight on a board, try to construct a tour that will visit every square on a chessboard without retracing steps`),
+    paragraph(`Or in plainer english, given a knight on a board, try to construct a tour. A tour is a journey that will visit every square on a chessboard without retracing steps`),
     interactiveTour(),
     paragraph(`For a human, this problem seems tricky because we can easily trap our own knight if not careful.`),
     paragraph(`If we just look at the possible knight moves on the first move, there's at most 8 possible moves on the first move.
@@ -162,20 +163,21 @@ function getChessProblemArticle() {
     paragraph(`An example of an 
     algorithm to compute 
     the n'th term of the Fibonacci Sequence.`),
-    paragraph(` A refresher on the Fibonacci sequence. It
-     is defined as such: The nth term in the sequence is the
+    paragraph(`The Fibonacci sequence is defined as such: The nth term in the sequence is the
       sum of the n-1 and the n-2 term in the same sequence, starting at 1. 
       The first few terms of the sequence when enumerated is 1,1,2,3,5,8...`),
     fibonacci(),
     paragraph(`To understand how this algorithm works, basically,
      the first line defines that we are declaring a function
-      which will take as input 'n'. In this case, n is a number.`),
+      which will take as input 'n'. In this case, n is the index of the term that we are looking for.`),
     fibonacci(0, 18),
-    paragraph(`The second line defines something called an 'if' statement. It basically means evaluate whatever is the argument to 'if' which is the second chunk and see if it returns true or false. If it returns true, go into the first chunk, if it returns false, go into the chunk after the 'else'`),
+    paragraph(`The second line defines something called an 'if' statement. 
+    It basically means evaluate the conditional in the 'if' statement
+     which is the code in the parentheses immediately after the if and see if is true or false. If the conditional is true, go into the first chunk of code, if it is false, go into the chunk after the 'else'`),
     fibonacci(23, 36),
-    paragraph(`When we evaluate the if statement and the first element is true, we go into the first if block and return 1.`),
+    paragraph(`When we evaluate the conditional and it is true, we go into the first if chunk and return 1.`),
     fibonacci(45, 53),
-    paragraph(`When we evalute the if statement and the condition is false. We will go into the second chunk`),
+    paragraph(`When we evalute the conditional and it is false. We will go into the second chunk`),
     fibonacci(67, 102),
     paragraph(`This is an example of what is known as recursion. Recursion 
     is the process with which a function will refer back to its original
@@ -195,9 +197,9 @@ function getChessProblemArticle() {
     paragraph(`A Graph is basically a structure that represents the relationships between 'nodes' using 'edges'.
     This is a very general definition as many things can be represented as a graph.
     For instance, a social network is a graph because we can represent nodes as 'people' and edges as 'relationships' between people.`),
-    socialNetworkGraph(),
+    img("./social_network.jpg"),
     paragraph(`Think about how we can represent a chessboard with a knight as a graph.`),
-    knightsTourGraph(),
+    img("./knights_move_graph.png"),
     paragraph(`In the above image, the nodes are the squares of the chessboard. 
     And the possible squares that the knight can reach in one move from a square are the edges.
     The numbers on the nodes represent how many possible moves the knight has. i.e. when the knight is on the corner, 
@@ -211,12 +213,14 @@ function getChessProblemArticle() {
     and then visiting the nearest neighbor. However, can you think of a problem with this approach?
     `),
     paragraph(`If you just visit your neighboring squares, you ultimately will just end back to where you are! How can we avoid
-    revisiting where we are?`),
-    hanselAndGretelImage(),
-    paragraph(`We have to mark where we are going! When we run into a dead end, we have to un-visit the node
-    and then back up and try another path.`),
+    revisiting where were?`),
+    img("./HanselandGretelCropped.png"),
+    paragraph(`We have to mark where we are going! When we run into a situation where 
+    if the only squares left that the knight can travel to have already been previously visited, then we have
+    reached a dead end, we have to backtrack until there is still a path that we can visit. We have to backtrack by
+    picking up the crumbs that we placed.`),
     paragraph(` To describe this in pseudocode, (n\ot real code but logically captures what is happening), we can
-    very succinctly represent the logic as this.`),
+    represent the logic as this.`),
     backTrackingPseudoCode(),
     interactiveBacktracking(),
     paragraph(`As you might notice, the naive backtracking approach takes extremely long. The reason why is because the number of
@@ -241,7 +245,14 @@ function getChessProblemArticle() {
     paragraph(`Note that while this may work for some instances, it actually still fails for some other squares where we could run into
     situations where we may have to revert back to backtracking. In this case, it is hard to determine whether or not Warnsdorff will always
     give us a solution. This problem of determining if there was a way to predict whether or not a program will halt or not, is a very interesting 
-    topic in Computer Science but essentially, it is indeterminable.`),
+    topic in Computer Science but essentially, it is indeterminable. However, there is an approach that we can use
+    that just simply combines the Warnsdorff heuristic plus backtracking which will reliably tour the chessboard for any square`),
+    knightsTour(),
+      H2(`Divide And Conquer?`),
+      H2(`Extra Credit Reading`),
+      H3(`Magic Knights Tours`),
+      H3(`General Hamiltonian Paths`),
+      H3(`P = NP?`),
   ]
 }
 
