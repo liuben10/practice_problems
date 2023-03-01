@@ -119,9 +119,9 @@ function interactiveKnightsTourHeuristic() {
   }/>);
 }
 
-function img(img_url) {
+function img(img_url, className="KnightMoveImage") {
   return <ContentBox content={
-    <img className="KnightMoveImage" src={img_url} /> 
+    <img className={className} src={img_url} /> 
   } />
 }
 
@@ -134,6 +134,7 @@ function knightsTour() {
 function getChessProblemArticle() {
   return [
     H1("A Knight's Tour"),
+    img("./knights-tour-130.png", "KnightMoveImageHeader"),
     H2(`Motivation`),
     paragraph(`The Knight's Tour problem is one of the most famous problems in Computer Science 
     and has been intensely studied by some of the greatest mathematical minds of all time
