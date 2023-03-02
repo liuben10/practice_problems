@@ -2,7 +2,7 @@ import {convertStateToFen, copyState, findKnightPos, generateHeatMap, nextKnight
 import {generateKnightsTour, generateKnightsTourSolutionBacktracking, heuristic} from './KnightsTourChess.js';
 import { Chessboard } from 'react-chessboard';
 import { useState, useEffect } from 'react';
-import $ from 'jquery';
+import $, { map } from 'jquery';
 import './KnightMoveProblem.css';
 
 const cols = 'abcdefgh';
@@ -56,16 +56,60 @@ function renderHeatMap2(heatmap, id) {
     }
 }
 
-function renderMove(id, kI, kJ, knightGameState) {
+function clearNumber(id, kI, kJ) {
     let ijconverted = convertIJToSqNotation([8-kI-1,kJ]);
     $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}] #${ijconverted}`).remove();
-    $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}]`).append(`<div id=${ijconverted} style="z-index: 3; color: rgb(0, 0, 0); align-self: flex-end; font-size: 10px;">${knightGameState.currentTourStep}</div>`);
 }
 
-function renderMoveHeatmap(id, kI, kJ, knightGameState) {
+function renderHeuristic(id, kI, kJ, knightGameState) {
+    let nextKM = nextKnightMoves(kI, kJ);
+    nextKM.forEach((mt, idx) => {
+        let h = heuristic(knightGameState.visited, mt);
+        renderNumberOnSquare(id, mt[0], mt[1], h);
+    });
+}
+
+function clearHeuristic(id, kI, kJ, knightGameState) {
+    let nextKM = nextKnightMoves(kI, kJ);
+    nextKM.forEach((mt, idx) => {
+        clearNumber(id, mt[0], mt[1]);
+    });
+}
+
+function clearStyle(id, kI, kJ) {
+    let ijconverted = convertIJToSqNotation([8-kI-1,kJ]);
+    $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}] #${ijconverted}`).remove();
+    let color = black;
+    if (isSquareWhite(kI, kJ)) {
+        color = white;
+    }
+    $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}]`).css('background-color', color);
+}
+
+function renderNumberOnSquare(id, kI, kJ, value) {
+    let ijconverted = convertIJToSqNotation([8-kI-1,kJ]);
+    $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}] #${ijconverted}`).remove();
+    $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}]`).append(`<div id=${ijconverted} style="z-index: 3; color: rgb(0, 0, 0); align-self: flex-end; font-size: 10px;">${value}</div>`);
+ 
+}
+
+function renderMove(id, kI, kJ, knightGameState) {
+    renderNumberOnSquare(id, kI, kJ, knightGameState.currentTourStep);
+}
+
+function renderMoveColorScale(id, kI, kJ, knightGameState) {
     let ijconverted = convertIJToSqNotation([8-kI-1,kJ]);
     let colorScaleIdx = knightGameState.currentTourStep % colorScale.length;
     $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}]`).css('background-color', colorScale[colorScaleIdx]);
+    let clearHeuristicPos = knightGameState.knightPos;
+    if (knightGameState.tourSoFar.length > 0) {
+        let lastKnightState = knightGameState.tourSoFar[knightGameState.tourSoFar.length-1];
+        clearHeuristicPos = lastKnightState.knightPos;
+    }
+    let lastKM = nextKnightMoves(clearHeuristicPos[0], clearHeuristicPos[1]);
+    for(let [lastI, lastJ] of lastKM) {
+        clearNumber(id, lastI, lastJ);
+    }
 }
 
 function renderBacktracking(id, kI, kJ, knightGameState) {
@@ -196,6 +240,15 @@ function KnightsTour(props) {
     )
 }
 
+function pieceDropFactory(setBoardStateFunc) {
+    let pieceDrop = (srcSq, targSq, _p) => {
+        let [targI, targJ] = convertSqNotationToIJ(targSq);
+        let newState = initState(8-targI-1, targJ);
+        setBoardStateFunc(newState)
+    }
+    return pieceDrop;       
+}
+
 function InteractiveKnightTourHeuristic(props) {
     // NOTE: Warnsdorff only really works without much backtracking for some squares.
     // Squares in the corner or on the edge give Warnsdorff alot of trouble
@@ -203,11 +256,15 @@ function InteractiveKnightTourHeuristic(props) {
     const [knightGameState, setBoardState] = useState(initialState);
     let convertedFen = convertStateToFen(knightGameState.boardState);
     
+    let showHeuristic = () => {
+        let [srcI, srcJ] = (knightGameState.knightPos);
+        renderHeuristic(props.id, srcI, srcJ, knightGameState);
+    }
     // TODO rendering is wonky.
     let nextFunc = () => {
         let newKnightGameState = copyState(knightGameState);
         let [srcI, srcJ] = (newKnightGameState.knightPos);
-        renderMoveHeatmap(props.id, srcI, srcJ, newKnightGameState);
+        renderMoveColorScale(props.id, srcI, srcJ, newKnightGameState);
         // let [targI, targJ] = convertSqNotationToIJ(targSq);
         if (newKnightGameState.currentTourStep === 64) {
             newKnightGameState.error = "SUCCESS! You found a Knights tour!";
@@ -269,6 +326,7 @@ function InteractiveKnightTourHeuristic(props) {
         newKnightGameState.boardState[8-srcI-1][srcJ] = 0;
         newKnightGameState.boardState[8-targI-1][targJ] = -1;
         newKnightGameState.visited[8-srcI-1][srcJ] = newKnightGameState.currentTourStep;
+        renderMoveColorScale(props.id, srcI, srcJ, newKnightGameState);
         newKnightGameState.knightPos = [targI, targJ];
         newKnightGameState.currentTourStep += 1;
         newKnightGameState.nextKnightMoves = [];
@@ -281,27 +339,19 @@ function InteractiveKnightTourHeuristic(props) {
     return (
         <div className = "KnightMoveProblem">
             <div class="ErrorContainer">{knightGameState.error}</div>
+            <button onClick={showHeuristic}>show</button>
             <button onClick={nextFunc}>next</button>
-            <Chessboard id={props.id} position={convertedFen} />
+            <Chessboard id={props.id} position={convertedFen} onPieceDrop={pieceDropFactory(setBoardState)}/>
         </div>
     )
 }
 
-function inBacktracking(srcI, srcJ, backtracking) {
-    for (let [mI, mJ] of backtracking) {
-        if (srcI == mI && srcJ == mJ) {
-            return true;
-        }
-    }
-    return false;
-}
 
 function InteractiveKnightTourBacktracking(props) {
     let initialState = initState()
     const [knightGameState, setBoardState] = useState(initialState);
     let convertedFen = convertStateToFen(knightGameState.boardState);
     
-    // TODO rendering is wonky.
     let nextFunc = () => {
         let newKnightGameState = copyState(knightGameState);
         let [srcI, srcJ] = (newKnightGameState.knightPos);
@@ -325,7 +375,7 @@ function InteractiveKnightTourBacktracking(props) {
             nextKnightMoveIndex: newKnightGameState.nextKnightMoveIndex,
             currentTourStep: newKnightGameState.currentTourStep,
         });
-        
+
         if ((newKnightGameState.nextKnightMoveIndex >= nextKM.length)) {
             newKnightGameState.tourSoFar.pop();
             let lastKnightMoveState = newKnightGameState.tourSoFar.pop();
@@ -361,7 +411,7 @@ function InteractiveKnightTourBacktracking(props) {
         <div className = "KnightMoveProblem">
             <div class="ErrorContainer">{knightGameState.error}</div>
             <button onClick={nextFunc}>next</button>
-            <Chessboard id={props.id} position={convertedFen} />
+            <Chessboard id={props.id} position={convertedFen} onPieceDrop={pieceDropFactory(setBoardState)} />
         </div>
     )
 }
