@@ -3,6 +3,7 @@ import './App.css';
 import './KnightMoveImage.css';
 import {ProblemDemo} from './ProblemDemo.js';
 import {ContentBox} from './ContentBox.js';
+import { useState, useEffect } from 'react';
 import { InteractiveCodeWindow, CodeDebugger, HighlightableCodeBloc} from './InteractiveCodeWindow.js';
 import { Provider } from 'react-redux';
 import knightStore from './knightStore';
@@ -78,6 +79,38 @@ function backTrackingPseudoCode() {
     <HighlightableCodeBloc code={backtrackingPseudocode} startLine={0} endLine={0} />
   } />
 }
+function howToBakeACake(startLine=0, endLine=0) {
+  let bakingACake = `
+   BakingACake:
+
+    Ingredients:
+    2 Sticks of UnsaltedButter
+    3 cups all-purpose flour
+    1 tablespoon baking-powder
+    1/2 teaspoon salt
+    1 1/4 cups sugar
+    4 large eggs, at room temperature
+    1 tablespoon vanilla extract
+    1 1/4 cups whole milk
+    
+    Step 1: Prepare Baking Pans
+    Step 2: Allow Ingredients to Reach Room Temperature
+    Step 3: Preheat the Oven
+    Step 4: Stir Together Dry Ingredients
+    Step 5: Combine the Butter and Sugar
+    Step 6: Add Eggs One at a Time
+    Step 7: Alternate Adding Dry and Wet Ingredients
+    Step 8: Pour Batter into Pans and Bake
+    Step 9: Check Cake for Doneness
+    Step 10: Cool the Cake Layers
+    Step 11: Assemble the Cake
+    Step 12: Add the First Coat of Frosting
+    `;
+    return <ContentBox content={
+      <HighlightableCodeBloc code={bakingACake} startLine={startLine} endLine={endLine} />
+    } />
+}
+
 function fibonacci4() {
   let fibonacci4 = `
     fib(4)
@@ -131,25 +164,70 @@ function knightsTour() {
   }/>);
 }
 
+function FactDemo(props) {
+  let initialState = {input: 0, output: 1};
+  const [factState, setFactState] = useState(initialState);
+
+  let setInput = (event) => {
+    setFactState(
+      {input: parseInt(event.target.value),
+      output: 1,
+      }
+    )
+  }
+  let fact = (n) => {
+    if (n === 1) {
+      return 1;
+    } else {
+      let previousFact = fact(n-1)
+      return previousFact * n;
+    }
+  }
+  let solve = () => {
+    setFactState(
+      { 
+        input: factState.input,
+        output: fact(factState.input)
+      }
+    );
+  };
+  return (
+      <div className = "KnightMoveProblem">
+          <input onChange={setInput} />
+          <button onClick={solve}>solve</button>
+          <text>Output: {factState.output}</text>
+      </div>
+  )
+}
+
+function factDemo() {
+  return (<ContentBox content={
+    <FactDemo id="factDemo" />
+  }/>);
+}
+
+
 function getChessProblemArticle() {
   return [
     H1("A Knight's Tour"),
     img("./knights-tour-130.png", "KnightMoveImageHeader"),
     H2(`Motivation`),
     paragraph(`The Knight's Tour problem is one of the most famous problems in Computer Science 
-    and has been intensely studied by some of the greatest mathematical minds of all time
-    including Leonard Euler. It was first mentioned in the 9th century AD in Sanskrit poetry in Rudrata's Kavyalankara where
-    the author prescribed a way to use a knight's tour to write out the syllables of a poem. It was later more thoroughly studied and in the 18th century and is still studied to this very day.`),
+    and has been studied since antiquity. It was first studied in the 9th century, where the tour of the knight on a chessboard perplexed
+    early mathematicians, who found many intricate patterns in the possible tours of the knight. It was then later rediscovered as a problem of
+    interest in the 18th century by Leonard Euler who pioneered some of the earliest analysis. In modern times, the Knights Tour is an interesting
+    problem to study because it is a simple case of a much more complicated problem in Computer Science.`),
     H2(`Introduction`),
+    img('./chessboard_image.jpg',  'KnightMoveImage'),
     paragraph(`Chess is a game played on an 8x8 board with 16 different pieces. Each kind of piece has its own way of moving
     in the game of chess. The King can move in any direction but only one square. The queen is like the king except not limited
     to just one square. The pawn can move forward and only capture diagonally. The rook can only move perpendicularly. The bishop can only move diagonally and the knight only moves two squares forward and then one square to the left or right.`),
-    paragraph(`Here's a graphic capturing this`),
     img("./knight_move.png"),
     paragraph(`The knight has at most 8 possible squares it can move to and it cannot move over the edge of the board.`),
     H2(`Problem`),
     paragraph(`"I found myself one day in company where, on the occasion of a game of chess, someone proposed this question: to traverse with a knight all the cells of the chessboard, without ever arriving twice at the same, and commencing from a given cell." -- Leonard Euler`),
     paragraph(`Or in plainer english, given a knight on a board, try to construct a tour. A tour is a journey that will visit every square on a chessboard without retracing steps`),
+    paragraph(`Let's try to find a tour!`),
     interactiveTour(),
     paragraph(`For a human, this problem seems tricky because we can easily trap our own knight if not careful.`),
     paragraph(`If we just look at the possible knight moves on the first move, there's at most 8 possible moves on the first move.
@@ -159,38 +237,55 @@ function getChessProblemArticle() {
     H2(`Terminology`),
     H3(`Algorithm`),
     paragraph('An algorithm is a sequence of statements and expressions used for problem-solving.'),
+    paragraph(`Algorithms can be very simple in their nature, you can think of an  algorithm as a more advanced
+    step-by-step set of instructions for solving a problem. Here's an example of an algorithm for how to bake a cake`),
+    howToBakeACake(),
+    paragraph(`The important thing to know about this algorithm is that it is comprised of:`),
+    paragraph(`1. Name`),
+    howToBakeACake(0, 18),
+    paragraph(`2. Inputs`),
+    howToBakeACake(20, 266),
+    paragraph(`3. Instructions`),
+    howToBakeACake(270, 746),
+    paragraph(`Algorithms take inputs and execute instructions. The result of that execution is either
+    returned as some kind of output (i.e. a Cake), or it will simply record the result somewhere. (i.e. if we wanted to save the cake in the fridge
+      for later.)`),
     paragraph(`Algorithms are agnostic to computing devices, in other words, we have had algorithms long before we ever had digital computers.
-    We have found algorithms for finding knights tours since the 19th century.`),
-    paragraph(`An example of an 
-    algorithm to compute 
-    the n'th term of the Fibonacci Sequence.`),
-    paragraph(`The Fibonacci sequence is defined as such: The nth term in the sequence is the
-      sum of the n-1 and the n-2 term in the same sequence, starting at 1. 
-      The first few terms of the sequence when enumerated is 1,1,2,3,5,8...`),
-    fibonacci(),
-    paragraph(`To understand how this algorithm works, basically,
-     the first line defines that we are declaring a function
-      which will take as input 'n'. In this case, n is the index of the term that we are looking for.`),
-    fibonacci(0, 18),
-    paragraph(`The second line defines something called an 'if' statement. 
-    It basically means evaluate the conditional in the 'if' statement
-     which is the code in the parentheses immediately after the if and see if is true or false. If the conditional is true, go into the first chunk of code, if it is false, go into the chunk after the 'else'`),
-    fibonacci(23, 36),
-    paragraph(`When we evaluate the conditional and it is true, we go into the first if chunk and return 1.`),
-    fibonacci(45, 53),
-    paragraph(`When we evalute the conditional and it is false. We will go into the second chunk`),
-    fibonacci(67, 102),
-    paragraph(`This is an example of what is known as recursion. Recursion 
-    is the process with which a function will refer back to its original
-     function call except with a different input that is usually
-      a sub-problem of the original input.`),
-    paragraph(`Recursion is a useful technique because
-    it greatly simplifies some problems that 
-    naturally have sub-problems that are identical to the original problem but with different inputs. In the case of
-    fibonacci, this makes sense because the definition of the 'n'th term is defined as a sum of the n-1th and n-2th term.
-    i.e. n-1 and n-2 terms are just other subproblems in the fibonacci sequence.`),
-    paragraph(`To illustrate how this works in practice, take the example of fib(4)`),
-    fibonacci4(),
+    Some of the earliest known algorithms are Euclid's algorithm for finding the Greatest Common Denominator between two natural numbers which he
+    first described in his book 'Elements' which he published in 300 BC. If you have ever added or multiplied two numbers, you're actually
+    going step by step through an algorithm that takes two inputs (numbers) and produces some output (their product).`),
+    img('./2dig_multiplication.png', "KnightMoveImage"),
+    H3('Recursion'),
+    paragraph(`One specific technique for writing algorithms is a technique called 'Recursion'`),
+    paragraph(`Imagine you wanted to find out the distance from New York to Seattle. However, in this world, humans have only
+    figured out how to communicate to someone within 200 miles of where they currently are (In this case you are in Seattle).
+    Let's also say you know the exact distance you are to any city within 200 miles but don't know the distance farther.
+    How can you find the distance from Seattle to New York?`),
+    img('./two_people_calling.jpg', "KnightMoveImage"),
+    paragraph(`If you can call someone within 200 miles of you -- i.e. you can call someone in Ellensburg -- then you can call
+    that person and ask them, how far they are from New York. The distance of you
+    to New york is the distance of you to that person + whatever that person says.`),
+    img('./demo_of_calling.png', "KnightMoveImage"),
+    paragraph(`However, now the question becomes, what's the distance for that person in Ellensburg to New York. To do that, the person will
+    call someone within 200 miles of Ellensburg (let's say Spokane) and ask them for the answer, then add their own distance to that answer.`),
+    paragraph(`When we called that someone else, we actually just gave them the same problem that we got, except now it is from their perspective. In
+    other words, if we could call our algorithm (DistanceToNewYork), and it has an argument of (myCity). Then the
+    DistanceToNewYork for myCity == DistanceToNewYork(city within 200 miles) + distance(myCity to city within 200 miles).
+    This last expression is what is called the recursive relationship.`),
+    paragraph(`So if this is the relationship, what ultimately stops us (you and everyone you know) from calling endlessly?`),
+    paragraph(`Ultimately, what will happen is that we will reach someone who is within 200 miles of new York. In that case, 
+    we hit the 'base case' which is if someone is within 200 miles of New York, just report that person's distance to New York rather
+    than calling someone else. This way, we break the chain of calling`),
+    paragraph(`An example of recursion in action is computing the Factorial function. If you recall, the factorial function is defined as taking
+    as an input, a natural number (the whole numbers starting at 1), and producing as the output the product of all numbers leading up to
+    and including that number. So as an example, the factorial of 6 = 6 * 5 * 4 * 3 * 2 * 1 = 720.`),
+    paragraph(`How can we reframe this as a recursive algorithm? In other words, what's my recursive relationship and what's my base case?`),
+    paragraph(`The base case is when my input is 1. 1 gives me a solution of 1.`),
+    paragraph(`The recursive relationship is given fact(n), how can I define this in terms of smaller inputs to fact?`),
+    paragraph(`The answer is fact(n-1) * n!`),
+    paragraph(`To see how this works in code, look at this demo`),
+    // TODO set breakpoints.
+    factDemo(),
     H3('Data Structures'),
     paragraph(`Data Structures are ways for us to represent complicated problems as objects
     that can be recognized by a program.`),
@@ -220,7 +315,7 @@ function getChessProblemArticle() {
     if the only squares left that the knight can travel to have already been previously visited, then we have
     reached a dead end, we have to backtrack until there is still a path that we can visit. We have to backtrack by
     picking up the crumbs that we placed.`),
-    paragraph(` To describe this in pseudocode, (n\ot real code but logically captures what is happening), we can
+    paragraph(` To describe this in pseudocode, (not real code but logically captures what is happening), we can
     represent the logic as this.`),
     backTrackingPseudoCode(),
     interactiveBacktracking(),
@@ -249,11 +344,6 @@ function getChessProblemArticle() {
     topic in Computer Science but essentially, it is indeterminable. However, there is an approach that we can use
     that just simply combines the Warnsdorff heuristic plus backtracking which will reliably tour the chessboard for any square`),
     knightsTour(),
-      H2(`Divide And Conquer?`),
-      H2(`Extra Credit Reading`),
-      H3(`Magic Knights Tours`),
-      H3(`General Hamiltonian Paths`),
-      H3(`P = NP?`),
   ]
 }
 
