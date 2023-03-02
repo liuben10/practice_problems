@@ -73,6 +73,7 @@ function copyState(knightGameState) {
         'tourSoFar': copyOfTourSoFar,
         'backtracking': [...knightGameState.backtracking],
         'stats': copyOfStats,
+        'tried': [...knightGameState.tried],
     };
 }
 

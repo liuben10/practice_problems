@@ -86,6 +86,15 @@ function clearStyle(id, kI, kJ) {
     $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}]`).css('background-color', color);
 }
 
+function clearAll(id) {
+    for(let i = 0; i < 8; i++) {
+        for(let j = 0; j < 8; j++) {
+            clearHeuristic(id, i, j);
+            clearStyle(id, i, j);
+        }
+    }
+}
+
 function renderNumberOnSquare(id, kI, kJ, value) {
     let ijconverted = convertIJToSqNotation([8-kI-1,kJ]);
     $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}] #${ijconverted}`).remove();
@@ -187,6 +196,7 @@ function initState(kI = 0, kJ = 0) {
         'tourSoFar': [],
         'backtracking': [],
         'stats': {tourSteps: 0, backtrackingSteps: 0},
+        'tried': [],
     }
 }
 
@@ -240,13 +250,23 @@ function KnightsTour(props) {
     )
 }
 
-function pieceDropFactory(setBoardStateFunc) {
+function pieceDropFactory(id, setBoardStateFunc) {
     let pieceDrop = (srcSq, targSq, _p) => {
         let [targI, targJ] = convertSqNotationToIJ(targSq);
         let newState = initState(8-targI-1, targJ);
         setBoardStateFunc(newState)
+        clearAll(id);
     }
     return pieceDrop;       
+}
+
+function isMoveInList(move, collection) {
+    for(let tuple of collection) {
+        if (move[0] === tuple[0] && move[1] === tuple[1]) {
+            return true;
+        }
+    };
+    return false;
 }
 
 function InteractiveKnightTourHeuristic(props) {
@@ -271,77 +291,63 @@ function InteractiveKnightTourHeuristic(props) {
             setBoardState(newKnightGameState);
             return;
         }
-        let sortedKnightMoves = []
-        if (newKnightGameState.nextKnightMoves.length === 0) {
-            newKnightGameState.backtracking = [];
-            let nextKM = nextKnightMoves(srcI, srcJ);
-            let filteredKnightMoves = [];
-            for(let knightMove of nextKM) {
-                let [targI, targJ] = knightMove;
-                if (newKnightGameState.visited[8-targI-1][targJ] === 0) {
-                    filteredKnightMoves.push([targI, targJ]);
+        let nextKM = nextKnightMoves(srcI, srcJ);
+        let minHeuristicAndMove = [Infinity, null];
+        nextKM.forEach( (knightMove) => {
+            if (newKnightGameState.visited[8-knightMove[0]-1][knightMove[1]] === 0
+                && !isMoveInList(knightMove, newKnightGameState.tried)) {
+                let h = heuristic(newKnightGameState.visited, knightMove);
+                if (h < minHeuristicAndMove[0]) {
+                    minHeuristicAndMove = [h, knightMove];
                 }
             }
-            sortedKnightMoves.push(...filteredKnightMoves.sort((mt1, mt2) => {
-                let h1 = heuristic(newKnightGameState.visited, mt1);
-                let h2 = heuristic(newKnightGameState.visited, mt2);
-                return  h1 - h2;
-            }));
-        } else {
-            sortedKnightMoves.push(...newKnightGameState.nextKnightMoves);
-        }
-        
-        if (newKnightGameState.nextKnightMoves.length === 0) {
-            newKnightGameState.tourSoFar.push({
-                knightPos: newKnightGameState.knightPos, 
-                nextKnightMoves: sortedKnightMoves,
-                nextKnightMoveIndex: 0
-            });
-        }
+        });
 
-        if (sortedKnightMoves.length === 0 || (newKnightGameState.nextKnightMoveIndex >= sortedKnightMoves.length)) {
-            newKnightGameState.tourSoFar.pop();
+        newKnightGameState.tourSoFar.push({
+            knightPos: newKnightGameState.knightPos, 
+            nextKnightMoves: nextKM,
+            tried: newKnightGameState.tried,
+            currentTourStep: newKnightGameState.currentTourStep,
+        });
+
+        if ((minHeuristicAndMove[1] == null) || (newKnightGameState.tried.length >= nextKM.length)) {
+            let attemptState = newKnightGameState.tourSoFar.pop();
             let lastKnightMoveState = newKnightGameState.tourSoFar.pop();
             let [targI, targJ] = lastKnightMoveState.knightPos;
 
             newKnightGameState.nextKnightMoves = [...lastKnightMoveState.nextKnightMoves];
-            newKnightGameState.nextKnightMoveIndex = lastKnightMoveState.nextKnightMoveIndex + 1;
-            newKnightGameState.tourSoFar.push({
-                knightPos: lastKnightMoveState.knightPos,
-                nextKnightMoves: sortedKnightMoves,
-                nextKnightMoveIndex: lastKnightMoveState.nextKnightMoveIndex + 1,
-            });
+            newKnightGameState.currentTourStep = lastKnightMoveState.currentTourStep;
             newKnightGameState.boardState[8-srcI-1][srcJ] = 0;
             newKnightGameState.boardState[8-targI-1][targJ] = -1;
             newKnightGameState.visited[8-srcI-1][srcJ] = 0;
-            newKnightGameState.currentTourStep -= 1;
             newKnightGameState.knightPos = [targI, targJ];
             newKnightGameState.backtracking.push([srcI, srcJ]);
-            renderTour(newKnightGameState.visited, props.id);
+            newKnightGameState.tried = [...lastKnightMoveState.tried];
+            newKnightGameState.tried.push(attemptState.knightPos)
+            renderBacktracking(props.id, srcI, srcJ, newKnightGameState);
             setBoardState(newKnightGameState);
             return;
         }
-        let knightMove = sortedKnightMoves[newKnightGameState.nextKnightMoveIndex];
-        let [targI, targJ] = knightMove;
+        clearBacktracking(props.id, newKnightGameState);
+        newKnightGameState.backtracking = [];
+        let [targI, targJ] = minHeuristicAndMove[1];
         newKnightGameState.boardState[8-srcI-1][srcJ] = 0;
         newKnightGameState.boardState[8-targI-1][targJ] = -1;
         newKnightGameState.visited[8-srcI-1][srcJ] = newKnightGameState.currentTourStep;
-        renderMoveColorScale(props.id, srcI, srcJ, newKnightGameState);
         newKnightGameState.knightPos = [targI, targJ];
         newKnightGameState.currentTourStep += 1;
         newKnightGameState.nextKnightMoves = [];
         newKnightGameState.nextKnightMoveIndex = 0;
-        // renderTour(newKnightGameState.visited, props.id);
+        newKnightGameState.tried = [];
         setBoardState(newKnightGameState);
         return;
-       
     }
     return (
         <div className = "KnightMoveProblem">
             <div class="ErrorContainer">{knightGameState.error}</div>
             <button onClick={showHeuristic}>show</button>
             <button onClick={nextFunc}>next</button>
-            <Chessboard id={props.id} position={convertedFen} onPieceDrop={pieceDropFactory(setBoardState)}/>
+            <Chessboard id={props.id} position={convertedFen} onPieceDrop={pieceDropFactory(props.id, setBoardState)}/>
         </div>
     )
 }
@@ -411,7 +417,7 @@ function InteractiveKnightTourBacktracking(props) {
         <div className = "KnightMoveProblem">
             <div class="ErrorContainer">{knightGameState.error}</div>
             <button onClick={nextFunc}>next</button>
-            <Chessboard id={props.id} position={convertedFen} onPieceDrop={pieceDropFactory(setBoardState)} />
+            <Chessboard id={props.id} position={convertedFen} onPieceDrop={pieceDropFactory(props.id, setBoardState)} />
         </div>
     )
 }
