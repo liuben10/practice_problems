@@ -232,9 +232,16 @@ function getChessProblemArticle() {
     paragraph(`For a human, this problem seems tricky because we can easily trap our own knight if not careful.`),
     paragraph(`If we just look at the possible knight moves on the first move, there's at most 8 possible moves on the first move.
     Then on the second move, there can be at most 7 possible moves, then potentially 7 again, so on and so forth... In other words, as my knights journey gets longer, there 
-    becomes an exponentially increasing amount of possible journeys my knight can take relative to the length of my journey.`),
-    paragraph(`So how can we produce a tour?`),
+    becomes an exponentially increasing amount of possible journeys my knight can take relative to the length of my journey. So how can we produce a tour?`),
     H2(`Terminology`),
+    H3(`Sequence`),
+    paragraph(`A sequence is a list of numbers called terms in a sequence.
+    A sequence is always assumed to be distinct terms (as opposed to a continuous curve or curves with disjointed 
+      continuous segments)`),
+    paragraph(`An example, 1,2,3,4,5,6,7...`),
+    H3(`Index`),
+    paragraph(`The index is the natural numbers + 0 indicating the position of a term in the sequence.`),
+    paragraph(`so if my sequence is (2,4,6,8,10,12,14...), then the index of 8 is 3. The index of 2 is 0.`),
     H3(`Algorithm`),
     paragraph('An algorithm is a sequence of statements and expressions used for problem-solving.'),
     paragraph(`Algorithms can be very simple in their nature, you can think of an  algorithm as a more advanced
@@ -278,7 +285,7 @@ function getChessProblemArticle() {
     than calling someone else. This way, we break the chain of calling`),
     paragraph(`An example of recursion in action is computing the Factorial function. If you recall, the factorial function is defined as taking
     as an input, a natural number (the whole numbers starting at 1), and producing as the output the product of all numbers leading up to
-    and including that number. So as an example, the factorial of 6 = 6 * 5 * 4 * 3 * 2 * 1 = 720.`),
+    and including that number. So as an example, the factorial of 6 is 6 * 5 * 4 * 3 * 2 * 1 = 720.`),
     paragraph(`How can we reframe this as a recursive algorithm? In other words, what's my recursive relationship and what's my base case?`),
     paragraph(`The base case is when my input is 1. 1 gives me a solution of 1.`),
     paragraph(`The recursive relationship is given fact(n), how can I define this in terms of smaller inputs to fact?`),
@@ -321,20 +328,19 @@ function getChessProblemArticle() {
     interactiveBacktracking(),
     paragraph(`As you might notice, the naive backtracking approach takes extremely long. The reason why is because the number of
     times you have to visit a square grows exponentially as well as the amount of backtracking that you must perform. 
-    
     In fact, there are roughly 4^51 possible different move sequences on an 8x8 board so this is far too intractable to just solve naively.`),
     paragraph(`However, we can use backtracking to solve for a smaller board. Below, I have an implementation using backtracking for a 6x6 board.
-    This is a much more reasonable problem because there's only 6,637,920 directed closed tours on a 6x6 board rather than 19 quintrillion closed directed tours`),
+    This is a much more reasonable problem because there's only 6,637,920 directed closed tours on a 6x6 board rather than 26 trillion closed directed tours`),
+    knightsTourBacktracking(),
     paragraph(`Backtracking is a useful technique to know for solving certain problems such as Sudoku, or 
     CSP type problems during leetcode interviews. In practicality, we don't utilize backtracking so much (or at least we would
       use more advanced techniques such as arc consistency to prune some of our backtracking)`),
-    knightsTourBacktracking(),
     H2(`Warnsdorff - A Remarkably good heuristic.`),
     paragraph(`One technique we can use to prune the search space would be to use something called a heuristic to evaluate the possible
     moves, and choose the best move in our current situation.
     
     A heuristic is a type of function that takes children states (in each case, every next move), and produces a score (just a number).
-    The algorithm uses the heurstic to determine without traversing any particular path, which route best to take. This technique
+    The algorithm uses the heuristic to determine without traversing any particular path, which route best to take. This technique
     is oftentimes used in chess engines for determining what are the best moves. It is very powerful since it can essentially
     cut down a ton of backtracking for us.`),
     interactiveKnightsTourHeuristic(),
@@ -344,6 +350,20 @@ function getChessProblemArticle() {
     topic in Computer Science but essentially, it is indeterminable. However, there is an approach that we can use
     that just simply combines the Warnsdorff heuristic plus backtracking which will reliably tour the chessboard for any square`),
     knightsTour(),
+    H2(`Conclusion`),
+    paragraph(`There's many more topics to cover on this subject and many resources for future reading.`),
+    paragraph(`For instance, it is currently unknown how many possible tours exist for an 8x8 chess board. However, we do know
+    the number of closed tours (tours where the starting square and the ending square are the same.). There are 26,534,728,821,064 or
+    26 trillion possible closed tours.`),
+    paragraph(`There are also solutions to find knights tours without much backtracking. One algorithm improvement using a divide-and-conquer
+    technique should be feasible for reducing the amount of backtracking needed significantly. However, this involves another algorithm to
+    divide the problem of touring a knight board and creating tour subproblems on the new divided pieces and stitching them together. This is
+    more complicated and hard to program + explain.`),
+    img('./MagicSquare_800.svg', "KnightMoveImage"),
+    paragraph(`A magic tour is a tour of a knights square such that the sum of the numbers for all columns, diagonals, and
+    rows is equivalent to the same number. It wasn't until 2003 that it was actually shown that there are no
+    magic knight tours. However, there are some well known semi-magic tours. The proof to show that there are no magic tours
+    took 61.4 CPU Days or 138.25 days of computation at 1 GHz.`)
   ]
 }
 
