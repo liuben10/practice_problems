@@ -24,12 +24,12 @@ function copyTour(tour) {
 
 function generateKnightsTourSolutionBacktrackingHelper(visited, kI, kJ, step, backtrackingSteps, tourSteps) {
     visited[8-kI-1][kJ] = step;
-    if (step === 36) {
+    tourSteps[0] += 1
+    if (step === 35) {
         return {'solution': visited, 'tourSteps': tourSteps[0], 'backtrackingSteps': backtrackingSteps[0]}
     }
     let next = nextKnightMoves(kI, kJ, 6);
     for (let moveTuple of next) {
-        tourSteps[0] += 1
         if (visited[8-moveTuple[0]-1][moveTuple[1]] !== 0) {
             continue;
         }
@@ -54,7 +54,7 @@ function generateKnightsTourSolutionBacktracking(knightGameState) {
         let copyOfRow = [...knightGameState.boardState[i]];
         visited.push(copyOfRow);
     }
-    let next = nextKnightMoves(kI, kJ, 6);
+    let next = nextKnightMoves(kI, kJ, 5);
     for (let moveTuple of next) {
         let foundTour = generateKnightsTourSolutionBacktrackingHelper(visited, moveTuple[0], moveTuple[1], step, backtrackingSteps, tourSteps);
         if (foundTour) {
@@ -67,8 +67,9 @@ function generateKnightsTourSolutionBacktracking(knightGameState) {
     return null;
 }
 
-function generateTourHelper(visited, i, j, step) {
+function generateTourHelper(visited, i, j, step, backtracking, tourSteps) {
     visited[8-i-1][j] = step;
+    tourSteps[0] += 1;
     let next = nextKnightMoves(i, j);
     next = next.filter((mT) => {
         let [mti, mtj] = mT;
@@ -89,11 +90,12 @@ function generateTourHelper(visited, i, j, step) {
     });
     for (let moveTuple of next) {
         let [mki, mkj] = moveTuple;
-        let hasTour = generateTourHelper(visited, mki, mkj, step+1);
+        let hasTour = generateTourHelper(visited, mki, mkj, step+1, backtracking, tourSteps);
         if (hasTour) {
             return true;
         } else {
             visited[8-mki-1][mkj] = 0;
+            backtracking[0] += 1;
         }
     }
 }
@@ -101,6 +103,8 @@ function generateTourHelper(visited, i, j, step) {
 function generateKnightsTour(knightGameState) {
     let [kI, kJ] = knightGameState.knightPos;
     let visited = []
+    let backtracking = [0];
+    let tourSteps = [0];
     for(let i = 0; i< 8; i++) {
         let copyOfRow = [...knightGameState.boardState[i]];
         visited.push(copyOfRow);
@@ -113,10 +117,12 @@ function generateKnightsTour(knightGameState) {
         return (h1-h2);
     });
     for (let moveTuple of next) {
-        let foundTour = generateTourHelper(visited, moveTuple[0], moveTuple[1], step);
+        let foundTour = generateTourHelper(visited, moveTuple[0], moveTuple[1], step, backtracking, tourSteps);
         if (foundTour) {
             console.log(visited);
-            return visited;
+            return [visited, backtracking, tourSteps];
+        } else {
+            backtracking[0] += 1;
         }
     }
 }

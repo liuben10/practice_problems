@@ -8,11 +8,9 @@ import './KnightMoveProblem.css';
 const cols = 'abcdefgh';
 
 const colorScale = [
-    "#05803c",
-    "#26ad63",
-    "#67e09e",
-    "#8cf5bb",
-    "#b4fad3",
+    "rgb(66, 135, 245)",
+    "rgb(255, 243, 130)",
+    "rgb(222, 112, 255)",
 ];
 let black = "rgb(181, 136, 99)";
 let white = "rgb(240, 217, 181)";
@@ -62,6 +60,7 @@ function clearNumber(id, kI, kJ) {
 }
 
 function renderHeuristic(id, kI, kJ, knightGameState) {
+    clearHeuristicFromKnightState(id, knightGameState);
     let nextKM = nextKnightMoves(kI, kJ);
     nextKM.forEach((mt, idx) => {
         let h = heuristic(knightGameState.visited, mt);
@@ -106,10 +105,7 @@ function renderMove(id, kI, kJ, knightGameState) {
     renderNumberOnSquare(id, kI, kJ, knightGameState.currentTourStep);
 }
 
-function renderMoveColorScale(id, kI, kJ, knightGameState) {
-    let ijconverted = convertIJToSqNotation([8-kI-1,kJ]);
-    let colorScaleIdx = knightGameState.currentTourStep % colorScale.length;
-    $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}]`).css('background-color', colorScale[colorScaleIdx]);
+function clearHeuristicFromKnightState(id, knightGameState) {
     let clearHeuristicPos = knightGameState.knightPos;
     if (knightGameState.tourSoFar.length > 0) {
         let lastKnightState = knightGameState.tourSoFar[knightGameState.tourSoFar.length-1];
@@ -119,6 +115,13 @@ function renderMoveColorScale(id, kI, kJ, knightGameState) {
     for(let [lastI, lastJ] of lastKM) {
         clearNumber(id, lastI, lastJ);
     }
+}
+
+function renderMoveColorScale(id, kI, kJ, knightGameState) {
+    let ijconverted = convertIJToSqNotation([8-kI-1,kJ]);
+    let colorScaleIdx = knightGameState.currentTourStep % colorScale.length;
+    $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}]`).css('background-color', colorScale[colorScaleIdx]);
+    clearHeuristicFromKnightState(id, knightGameState);
 }
 
 function renderBacktracking(id, kI, kJ, knightGameState) {
@@ -201,7 +204,7 @@ function initState(kI = 0, kJ = 0) {
 }
 
 function KnightsTourBacktracking(props) {
-    let initialState = initState()
+    let initialState = initState(6, 2)
     const [knightGameState, setBoardState] = useState(initialState);
     let convertedFen = convertStateToFen(knightGameState.boardState);
     
@@ -236,15 +239,19 @@ function KnightsTour(props) {
         newKnightGameState.boardState[8-srcI-1][srcJ] = 0;
         newKnightGameState.boardState[8-targI-1][targJ] = -1;
         newKnightGameState.knightPos = [targI, targJ];
-        setBoardState(newKnightGameState);
-        let tour = generateKnightsTour(newKnightGameState);
+        let [tour, backtracking, tourSteps] = generateKnightsTour(newKnightGameState);
         console.log(tour);
         if (tour) {
             renderTour(tour, props.id);
         }
+        newKnightGameState.stats.tourSteps = tourSteps[0];
+        newKnightGameState.stats.backtrackingSteps = backtracking[0];
+        setBoardState(newKnightGameState);
     }
     return (
         <div className = "KnightMoveProblem">
+            <div>Number of Visits: {knightGameState.stats.tourSteps}</div>
+            <div>Number of Backtracks: {knightGameState.stats.backtrackingSteps}</div>
             <Chessboard id={props.id} position={convertedFen} onPieceDrop = {pieceDrop} />
         </div>
     )

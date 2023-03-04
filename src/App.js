@@ -44,36 +44,68 @@ function fibonacci(startline = 0, endline = 0) {
   } />
 }
 function backTrackingPseudoCode() {
-  let backtrackingPseudocode = `    
-    Create an empty chess board. (We will be using this chess board to mark which squares we have visited. This chess board will have no squares marked at first, since we haven't traveled to any squares.)
+  let backtrackingPseudocode = `  
+    solveKnightGame: 
+      ingredients:
+        knightPos: <-- starting position of my knight on the chessboard.
 
-    Create a list of all the squares we have visited (in the order that we visited them) that have taken us to this current square we are on. (This list will be empty at first, since we haven't traveled to any square yet.) We will call this list the path.
+      visited <-- Create an empty chess board
 
-    (As we move to a new square, we will update this chess board (by marking the current square as visited) to reflect the squares we have traveled to thusfar (given the path that we have taken), and we will also update the path by adding the current square to the list.)
+      place my knight on visited. 
+
+      stepSoFar <--(1) initialize As 1 indicating the length of the current tour. Initialize as 1 to mark the number of steps that my tour is so far.
+
+      nextKnightMoves <-- Next set of squares that my knight can move to.
+
+      for each nextKnightMove of my nextKnightMoves
+          foundTour <-- solveKnightGameHelper(visited, nextKnightMove, stepSoFar);
+          if I have found a tour
+            then return visited; -- visited we will mark with the solution;
+          
+          otherwise
+
+            then 'unvisit' that position on visited
+      }
+
+    /*
+    *
+    * visited will look like this.
+    * 
+    * [59, 34, 17, 52, 31, 4, 15, 2]
+    * [18, 45, 58, 33, 16, 1, 30, 5]
+    * [35, 60, 53, 46, 51, 32, 3, 14]
+    * [44, 19, 50, 57, -1, 55, 6, 29]
+    * [49, 36, 61, 54, 47, 28, 13, 26]
+    * [20, 43, 48, 39, 56, 25, 10, 7]
+    * [37, 62, 41, 22, 9, 12, 27, 24]
+    * [42, 21, 38, 63, 40, 23, 8, 11]
+    * 
+    * */
+
+    solveKnightGameHelper:
+      ingredients:
+        visited <-- chessboard (8x8 matrix) that will contain my solution.
+        knightPos: <-- starting position of my knight on the chessboard.
+        stepSoFar: <-- current step I am on my tour.
+
+        visited.at(knightPos) <--(stepSoFar) place stepSoFar on my chessboard
   
-    Start on any square of the chess board.  
+        if my current stepSoFar == 63
+          then I've toured my chessboard!
 
-    Define a function called KnightsTour which takes as an input: the square that you are on, the path (that has taken us to this current square), and the chess board (with the squares that have been visited marked with X's). The KnightsTour function's output is a boolean (a true or false) that represents whether or not we have found a tour.
+        otherwise
 
-    The KnightsTour function is defined as follows:
+          nextKnightMoves <-- Next set of squares that my knight **which is now placed at the new knightPos position** can now move to.
+  
+          for each nextKnightMove of my nextKnightMoves
+              foundTour <-- solveKnightGameHelper(visited, nextKnightMove, stepSoFar);
+              if I have found a tour
+                then return visited; -- visited we will mark with the solution;
+            
+              otherwise
+  
+                then 'unvisit' that position on visited
 
-      If the length of the path we have traveled to (with this current path) is less than 64 (the total number of squares on a chess board):
-
-        Mark the current square that I am on as visited. (On the chess board, mark this current square with an X.)
-
-        Add this current square to the path that has taken us to this current square.
-
-        Make a list of all the possible squares that I could travel to from my current square.
-
-        If any of these squares have already been visited (i.e. they already have an X on them on the chessboard), cross them off the list.
-
-        If there are no unvisited squares in this list, then return false.
-
-        For each square in the list of unvisited squares, choose that square, and name it the new square. 
-
-          Call the KnightsTour function with this new square, updated path, and updated chess board as its input.
-          If this recursive call is true, then return true.
-          Otherwise, unmark the previously visited move.
   `
   return <ContentBox content={
     <HighlightableCodeBloc code={backtrackingPseudocode} startLine={0} endLine={0} />
@@ -338,11 +370,13 @@ function getChessProblemArticle() {
     H2(`Warnsdorff - A Remarkably good heuristic.`),
     paragraph(`One technique we can use to prune the search space would be to use something called a heuristic to evaluate the possible
     moves, and choose the best move in our current situation.
-    
     A heuristic is a type of function that takes children states (in each case, every next move), and produces a score (just a number).
     The algorithm uses the heuristic to determine without traversing any particular path, which route best to take. This technique
     is oftentimes used in chess engines for determining what are the best moves. It is very powerful since it can essentially
     cut down a ton of backtracking for us.`),
+    paragraph(` The heuristic we are going to use is called Warnsdorff's heuristic. It's defined as giving each next move a score which is
+    equal to the square with the lowest number of possible next moves. In other words, always picking the square that "leaves us with the 
+    most room to move our knight".`),
     interactiveKnightsTourHeuristic(),
     paragraph(`Note that while this may work for some instances, it actually still fails for some other squares where we could run into
     situations where we may have to revert back to backtracking. In this case, it is hard to determine whether or not Warnsdorff will always
