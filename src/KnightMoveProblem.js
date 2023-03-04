@@ -56,7 +56,7 @@ function renderHeatMap2(heatmap, id) {
 
 function clearNumber(id, kI, kJ) {
     let ijconverted = convertIJToSqNotation([8-kI-1,kJ]);
-    $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}] #${ijconverted}`).remove();
+    $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}] div #${ijconverted + "Number"}`).remove();
 }
 
 function renderHeuristic(id, kI, kJ, knightGameState) {
@@ -77,7 +77,7 @@ function clearHeuristic(id, kI, kJ, knightGameState) {
 
 function clearStyle(id, kI, kJ) {
     let ijconverted = convertIJToSqNotation([8-kI-1,kJ]);
-    $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}] #${ijconverted}`).remove();
+    $(`div[data-boardid=${id}] div[data-square=${ijconverted}] div #${ijconverted + "Number"}`).remove();
     let color = black;
     if (isSquareWhite(kI, kJ)) {
         color = white;
@@ -96,8 +96,8 @@ function clearAll(id) {
 
 function renderNumberOnSquare(id, kI, kJ, value) {
     let ijconverted = convertIJToSqNotation([8-kI-1,kJ]);
-    $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}] #${ijconverted}`).remove();
-    $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}]`).append(`<div id=${ijconverted} style="z-index: 3; color: rgb(0, 0, 0); align-self: flex-end; font-size: 10px;">${value}</div>`);
+    $(`div[data-boardid=${id}] div[data-square=${ijconverted}] div #${ijconverted + "Number"}`).remove();
+    $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}] div`).append(`<div id=${ijconverted + "Number"}>${value}</div>`);
  
 }
 
@@ -126,7 +126,7 @@ function renderMoveColorScale(id, kI, kJ, knightGameState) {
 
 function renderBacktracking(id, kI, kJ, knightGameState) {
     let ijconverted = convertIJToSqNotation([8-kI-1,kJ]);
-    $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}] #${ijconverted}`).remove();
+    $(`div[data-boardid=${id}] div[data-square=${ijconverted}] div #${ijconverted + "Number"}`).remove();
     $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}]`).css('background-color', backtrackingColor);    
 }
 
@@ -147,7 +147,7 @@ function renderTour(tour, id, renderFunc, shouldClearText = true, knightGameStat
         for(let i = 0; i < 8; i++) {
             for (let j = 0; j < 8; j++) {
                 let ijconverted = convertIJToSqNotation([i, j]);
-                $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}] #${ijconverted}`).remove();
+                $(`div[data-boardid=${id}] div[data-square=${ijconverted}] div #${ijconverted + "Number"}`).remove();
             }
         }
     }
@@ -156,7 +156,7 @@ function renderTour(tour, id, renderFunc, shouldClearText = true, knightGameStat
             let ijconverted = convertIJToSqNotation([i,j]);
             if (tour[i][j] !== -1 && tour[i][j] !== 0) {
                 if (renderFunc == null) {
-                    $(`div[data-boardid=${id}]`).find(`div[data-square=${ijconverted}]`).append(`<div id=${ijconverted} style="z-index: 3; color: rgb(0, 0, 0); align-self: flex-end; font-size: 10px;">${tour[i][j]}</div>`);
+                    renderNumberOnSquare(id, 8-i-1, j, tour[i][j]);
                 } else {
                     renderFunc(id, ijconverted, tour, i, j, knightGameState);
                 }
@@ -425,6 +425,7 @@ function InteractiveKnightTourBacktracking(props) {
             <div class="ErrorContainer">{knightGameState.error}</div>
             <button onClick={nextFunc}>next</button>
             <Chessboard id={props.id} position={convertedFen} onPieceDrop={pieceDropFactory(props.id, setBoardState)} />
+            <div class="ContentBox"><button onClick={nextFunc}>next</button></div>
         </div>
     )
 }
@@ -460,6 +461,7 @@ function InteractiveKnightTour(props) {
             setBoardState(newKnightGameState);
             return;
         }
+        renderMoveColorScale(props.id, targI, targJ, newKnightGameState);
         newKnightGameState.boardState[8-srcI-1][srcJ] = 0;
         newKnightGameState.boardState[8-targI-1][targJ] = -1;
         newKnightGameState.knightPos = [targI, targJ];
@@ -471,7 +473,6 @@ function InteractiveKnightTour(props) {
                 $(`div[data-boardid=${boardId}]`).find(`div[data-square=${ijconverted}]`).css('background-color', `${color}`).append(`<div id=${ijconverted} style="z-index: 3;  color: rgb(0, 0, 0); align-self: flex-end; font-size: 5px;">${tour[i][j]}</div>`);
             }
         }
-        renderTour(newKnightGameState.visited, props.id, renderFunc, false);
         setBoardState(newKnightGameState);
     }
     return (

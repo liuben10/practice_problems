@@ -315,7 +315,7 @@ function getChessProblemArticle() {
     img('./two_people_calling.jpg', "KnightMoveImage"),
     paragraph(`If you can call someone within 200 miles of you -- i.e. you can call someone in Ellensburg -- then you can call
     that person and ask them, how far they are from New York. The distance of you
-    to New york is the distance of you to that person + whatever that person says.`),
+    to New york is the distance of you to that person + whatever that person says is their distance to New York.`),
     img('./demo_of_calling.png', "KnightMoveImage"),
     paragraph(`However, now the question becomes, what's the distance for that person in Ellensburg to New York. To do that, the person will
     call someone within 200 miles of Ellensburg (let's say Spokane) and ask them for the answer, then add their own distance to that answer.`),
