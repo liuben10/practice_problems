@@ -272,20 +272,24 @@ function getChessProblemArticle() {
     paragraph(`A sequence is a list of numbers called terms in a sequence.
     A sequence is always assumed to be distinct terms (as opposed to a continuous curve or curves with disjointed 
       continuous segments)`),
-    paragraph(`An example, 1,2,3,4,5,6,7...`),
+    paragraph(`An example, 0,2,4,6,8,10,12,14...`),
     H3(`Index`),
     paragraph(`The index is the natural numbers + 0 indicating the position of a term in the sequence.`),
-    paragraph(`so if my sequence is (2,4,6,8,10,12,14...), then the index of 8 is 3. The index of 2 is 0.`),
+    paragraph(`so if my sequence is (0,2,4,6,8,10,12,14...), then the index of 8 is 3. The index of 2 is 0.`),
+    paragraph(`you can always think of indexes as another sequence (0,1,2,3,4,5,6,7...) that runs along my sequence.`),
+    paragraph(`0,2,4,6,8,10,12,14...`),
+    paragraph(`0,1,2,3,4,5,6,7...`),
     H3(`Variable`),
     paragraph(` Think of a variable as a box that holds my stuff. Or in otherwords just another word for a named box.`),
     img('./box_with_stuff.jpg'),
     H3(`State`),
-    paragraph(`State is the complete set of every variable that I need to remember currently.`),
-    paragraph(`I indicate that I am saving something my state by indicating it with an arrow like so.`),
+    paragraph(`State is the complete set of every variable that I need to remember currently. I.e. the collection
+    of all boxes and what they hold is called the state (its the state of my program).`),
+    paragraph(`I indicate that I am saving something into my state by indicating it with an arrow like so.`),
     paragraph(`someBoxThatHoldsStuff <-- Stuff`),
     H3(`Algorithm`),
     paragraph('An algorithm is a sequence of statements and expressions used for problem-solving.'),
-    paragraph(`Algorithms can be very simple in their nature, you can think of an  algorithm as a more advanced
+    paragraph(`Algorithms can be very simple in their nature, you can think of an  algorithm as
     step-by-step set of instructions for solving a problem. Here's an example of an algorithm for how to bake a cake`),
     howToBakeACake(),
     paragraph(`The important thing to know about this algorithm is that it is comprised of:`),
@@ -296,11 +300,10 @@ function getChessProblemArticle() {
     paragraph(`3. Instructions (otherwise called code.)`),
     howToBakeACake(270, 746),
     paragraph(`Algorithms take inputs and execute instructions. The result of that execution is either
-    returned as some kind of output (i.e. a Cake), or it will simply record the result somewhere. (i.e. if we wanted to save the cake in the fridge
-      for later.)`),
+    returned as some kind of output (i.e. a Cake), or it will simply record the result somewhere. (i.e. if we store it in my state
+      with a refrigerator).`),
     paragraph(`Algorithms are agnostic to computing devices, in other words, we have had algorithms long before we ever had digital computers.
-    Some of the earliest known algorithms are Euclid's algorithm for finding the Greatest Common Denominator between two natural numbers which he
-    first described in his book 'Elements' which he published in 300 BC. If you have ever added or multiplied two numbers, you're actually
+    Some of the earliest known algorithms are Euclid's algorithm for finding the Greatest Common Denominator between two natural numbers. If you have ever added or multiplied two numbers, you're actually
     going step by step through an algorithm that takes two inputs (numbers) and produces some output (their product).`),
     img('./2dig_multiplication.png', "KnightMoveImage"),
     H3('Recursion'),
@@ -320,6 +323,7 @@ function getChessProblemArticle() {
     other words, if we could call our algorithm (DistanceToNewYork), and it has an argument of (myCity). Then the
     DistanceToNewYork for myCity == DistanceToNewYork(city within 200 miles) + distance(myCity to city within 200 miles).
     This last expression is what is called the recursive relationship.`),
+    img('./recursion_relationship.png', "KnightChessImage"),
     paragraph(`So if this is the relationship, what ultimately stops us (you and everyone you know) from calling endlessly?`),
     paragraph(`Ultimately, what will happen is that we will reach someone who is within 200 miles of new York. In that case, 
     we hit the 'base case' which is if someone is within 200 miles of New York, just report that person's distance to New York rather
@@ -329,8 +333,9 @@ function getChessProblemArticle() {
     and including that number. So as an example, the factorial of 6 is 6 * 5 * 4 * 3 * 2 * 1 = 720.`),
     paragraph(`How can we reframe this as a recursive algorithm? In other words, what's my recursive relationship and what's my base case?`),
     paragraph(`The base case is when my input is 1. 1 gives me a solution of 1.`),
-    paragraph(`The recursive relationship is given fact(n), how can I define this in terms of smaller inputs to fact?`),
-    paragraph(`The answer is fact(n-1) * n!`),
+    paragraph(`To find the recursive relationship, think how can we define the solution s = fact(n) as fact(n-1)?
+    in other words do what to fact(n-1) to get fact(n)?`),
+    paragraph(`The answer is fact(n-1) * n`),
     paragraph(`To see how this works in code, look at this demo`),
     // TODO set breakpoints.
     factDemo(),
@@ -357,8 +362,7 @@ function getChessProblemArticle() {
     and then visiting the nearest neighbor. However, can you think of a problem with this approach?
     `),
     img(`./complicated_path_out_of_woods.png`, "KnightMoveImage"),
-    paragraph(`If you just always went left, would you end up at the entrance?`),
-    paragraph(`No! You would run into a cycle!`),
+    paragraph(`If you went left right left, you would run into a cycle!`),
     img(`./knight_cycle.png`, "KnightMoveImage"),
     paragraph(`We need some way of avoiding cycles.  i.e. We need to avoid just ending up back where we. 
     Can you think of a way of avoiding cycles? An idea comes from an age old fairy tale.`),
