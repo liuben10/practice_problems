@@ -8,9 +8,9 @@ import './KnightMoveProblem.css';
 const cols = 'abcdefgh';
 
 const colorScale = [
-    "rgb(66, 135, 245)",
-    "rgb(255, 243, 130)",
-    "rgb(222, 112, 255)",
+    "rgb(66, 135, 245)", // blue
+    "rgb(18, 99, 57)", // green
+    "rgb(222, 112, 255)", // pink
 ];
 let black = "rgb(181, 136, 99)";
 let white = "rgb(240, 217, 181)";

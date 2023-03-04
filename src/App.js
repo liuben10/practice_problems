@@ -49,23 +49,23 @@ function backTrackingPseudoCode() {
       ingredients:
         knightPos: <-- starting position of my knight on the chessboard.
 
-      visited <-- Create an empty chess board
+      code:
+        visited <-- Create an empty chess board
 
-      place my knight on visited. 
+        place my knight on visited. 
 
-      stepSoFar <--(1) initialize As 1 indicating the length of the current tour. Initialize as 1 to mark the number of steps that my tour is so far.
+        stepSoFar <--(1) initialize As 1 indicating the length of the current tour. Initialize as 1 to mark the number of steps that my tour is so far.
 
-      nextKnightMoves <-- Next set of squares that my knight can move to.
+        nextKnightMoves <-- Next set of squares that my knight can move to.
 
-      for each nextKnightMove of my nextKnightMoves
-          foundTour <-- solveKnightGameHelper(visited, nextKnightMove, stepSoFar);
-          if I have found a tour
-            then return visited; -- visited we will mark with the solution;
-          
-          otherwise
+        for each nextKnightMove of my nextKnightMoves
+            foundTour <-- solveKnightGameHelper(visited, nextKnightMove, stepSoFar);
+            if I have found a tour
+              then return visited; -- visited we will mark with the solution;
+            
+            otherwise
 
-            then 'unvisit' that position on visited
-      }
+              then 'unvisit' that position on visited
 
     /*
     *
@@ -88,23 +88,25 @@ function backTrackingPseudoCode() {
         knightPos: <-- starting position of my knight on the chessboard.
         stepSoFar: <-- current step I am on my tour.
 
-        visited.at(knightPos) <--(stepSoFar) place stepSoFar on my chessboard
-  
-        if my current stepSoFar == 63
-          then I've toured my chessboard!
+      code:
+          visited.at(knightPos) <--(stepSoFar) place stepSoFar on my chessboard
+    
+          if my current stepSoFar == 63
+            then I've toured my chessboard!
+            return visited.
 
-        otherwise
+          otherwise
 
-          nextKnightMoves <-- Next set of squares that my knight **which is now placed at the new knightPos position** can now move to.
-  
-          for each nextKnightMove of my nextKnightMoves
-              foundTour <-- solveKnightGameHelper(visited, nextKnightMove, stepSoFar);
-              if I have found a tour
-                then return visited; -- visited we will mark with the solution;
-            
-              otherwise
-  
-                then 'unvisit' that position on visited
+            nextKnightMoves <-- Next set of squares that my knight **which is now placed at the new knightPos position** can now move to.
+    
+            for each nextKnightMove of my nextKnightMoves
+                foundTour <-- solveKnightGameHelper(visited, nextKnightMove, stepSoFar);
+                if I have found a tour
+                  then return visited; -- visited we will mark with the solution;
+              
+                otherwise
+    
+                  then 'unvisit' that position on visited
 
   `
   return <ContentBox content={
@@ -248,7 +250,7 @@ function getChessProblemArticle() {
     and has been studied since antiquity. It was first studied in the 9th century, where the tour of the knight on a chessboard perplexed
     early mathematicians, who found many intricate patterns in the possible tours of the knight. It was then later rediscovered as a problem of
     interest in the 18th century by Leonard Euler who pioneered some of the earliest analysis. In modern times, the Knights Tour is an interesting
-    problem to study because it is a simple case of a much more complicated problem in Computer Science.`),
+    problem to study because it is a simple case of a much more complicated problem in Computer Science called the Hamiltonian Graph problem which is intrical in the study of P=NP.`),
     H2(`Introduction`),
     img('./chessboard_image.jpg',  'KnightMoveImage'),
     paragraph(`Chess is a game played on an 8x8 board with 16 different pieces. Each kind of piece has its own way of moving
@@ -274,6 +276,13 @@ function getChessProblemArticle() {
     H3(`Index`),
     paragraph(`The index is the natural numbers + 0 indicating the position of a term in the sequence.`),
     paragraph(`so if my sequence is (2,4,6,8,10,12,14...), then the index of 8 is 3. The index of 2 is 0.`),
+    H3(`Variable`),
+    paragraph(` Think of a variable as a box that holds my stuff. Or in otherwords just another word for a named box.`),
+    img('./box_with_stuff.jpg'),
+    H3(`State`),
+    paragraph(`State is the complete set of every variable that I need to remember currently.`),
+    paragraph(`I indicate that I am saving something my state by indicating it with an arrow like so.`),
+    paragraph(`someBoxThatHoldsStuff <-- Stuff`),
     H3(`Algorithm`),
     paragraph('An algorithm is a sequence of statements and expressions used for problem-solving.'),
     paragraph(`Algorithms can be very simple in their nature, you can think of an  algorithm as a more advanced
@@ -284,7 +293,7 @@ function getChessProblemArticle() {
     howToBakeACake(0, 18),
     paragraph(`2. Inputs`),
     howToBakeACake(20, 266),
-    paragraph(`3. Instructions`),
+    paragraph(`3. Instructions (otherwise called code.)`),
     howToBakeACake(270, 746),
     paragraph(`Algorithms take inputs and execute instructions. The result of that execution is either
     returned as some kind of output (i.e. a Cake), or it will simply record the result somewhere. (i.e. if we wanted to save the cake in the fridge
@@ -347,8 +356,12 @@ function getChessProblemArticle() {
     How could you find a way out of the woods? You could think about just looking at all of your neighboring squares,
     and then visiting the nearest neighbor. However, can you think of a problem with this approach?
     `),
-    paragraph(`If you just visit your neighboring squares, you ultimately will just end back to where you are! How can we avoid
-    revisiting where were?`),
+    img(`./complicated_path_out_of_woods.png`, "KnightMoveImage"),
+    paragraph(`If you just always went left, would you end up at the entrance?`),
+    paragraph(`No! You would run into a cycle!`),
+    img(`./knight_cycle.png`, "KnightMoveImage"),
+    paragraph(`We need some way of avoiding cycles.  i.e. We need to avoid just ending up back where we. 
+    Can you think of a way of avoiding cycles? An idea comes from an age old fairy tale.`),
     img("./HanselandGretelCropped.png"),
     paragraph(`We have to mark where we are going! When we run into a situation where 
     if the only squares left that the knight can travel to have already been previously visited, then we have
@@ -360,13 +373,14 @@ function getChessProblemArticle() {
     interactiveBacktracking(),
     paragraph(`As you might notice, the naive backtracking approach takes extremely long. The reason why is because the number of
     times you have to visit a square grows exponentially as well as the amount of backtracking that you must perform. 
-    In fact, there are roughly 4^51 possible different move sequences on an 8x8 board so this is far too intractable to just solve naively.`),
+    In fact, there are roughly 4^51 (naive product of all of the possible knight moves on each square of the chessboard) possible different move sequences on an 8x8 board so this is far too intractable to just solve naively.`),
     paragraph(`However, we can use backtracking to solve for a smaller board. Below, I have an implementation using backtracking for a 6x6 board.
-    This is a much more reasonable problem because there's only 6,637,920 directed closed tours on a 6x6 board rather than 26 trillion closed directed tours`),
+    This is a much more reasonable problem because there's only 6,637,920 directed closed tours on a 6x6 board rather than 26 trillion closed directed tours on an 8x8 board`),
     knightsTourBacktracking(),
     paragraph(`Backtracking is a useful technique to know for solving certain problems such as Sudoku, or 
     CSP type problems during leetcode interviews. In practicality, we don't utilize backtracking so much (or at least we would
-      use more advanced techniques such as arc consistency to prune some of our backtracking)`),
+      use more advanced techniques such as arc consistency to prune some of our backtracking). It generates far too many calls!
+      What if we could be smart about how we picked the move that the knight will move to.`),
     H2(`Warnsdorff - A Remarkably good heuristic.`),
     paragraph(`One technique we can use to prune the search space would be to use something called a heuristic to evaluate the possible
     moves, and choose the best move in our current situation.
@@ -376,7 +390,9 @@ function getChessProblemArticle() {
     cut down a ton of backtracking for us.`),
     paragraph(` The heuristic we are going to use is called Warnsdorff's heuristic. It's defined as giving each next move a score which is
     equal to the square with the lowest number of possible next moves. In other words, always picking the square that "leaves us with the 
-    most room to move our knight".`),
+    most room to move our knight". This is kind of interesting because in chess, its a good idea to look at moves that give you the most
+    tactical capabilities. AKA which moves give you the most next moves so the opposite direction of what Warnsdorff is doing. 
+    This is kind of similar to a skill at seeing that you train in chess.`),
     interactiveKnightsTourHeuristic(),
     paragraph(`Note that while this may work for some instances, it actually still fails for some other squares where we could run into
     situations where we may have to revert back to backtracking. In this case, it is hard to determine whether or not Warnsdorff will always
