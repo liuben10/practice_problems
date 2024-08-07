@@ -5,6 +5,7 @@ class Excel:
         self.COLS = cols
 
         self.includeHeader = includeHeader
+        print("Hello")
 
         self.sheet = [["" for _ in range(self.COLS)] for _ in range(self.ROWS)]
         print("bab")
