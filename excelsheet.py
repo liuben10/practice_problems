@@ -7,6 +7,7 @@ class Excel:
         self.includeHeader = includeHeader
 
         self.sheet = [["" for _ in range(self.COLS)] for _ in range(self.ROWS)]
+        print("bab")
         if (self.includeHeader):
             self.processExcelColNames()
 
