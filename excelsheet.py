@@ -10,6 +10,7 @@ class Excel:
         print("bab")
         if (self.includeHeader):
             self.processExcelColNames()
+        print("Hi")
 
     def colHeaderToInt(self, c: str) -> int:
         num = 0
