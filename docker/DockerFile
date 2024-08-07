@@ -1,0 +1,6 @@
+FROM apache/spark:lastest
+
+RUN ./spark/sbin/start-master.sh
+
+EXPOSE 4040
+EXPOSE 7070
